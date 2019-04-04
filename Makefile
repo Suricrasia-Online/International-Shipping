@@ -23,7 +23,7 @@ shader.frag.min : shader.frag Makefile
 	sed -i 's/m_reflectance/i/g' shader.frag.min
 	sed -i 's/m_transparency/c/g' shader.frag.min
 
-	sed -i 's/MAXDEPTH/5/g' shader.frag.min
+	sed -i 's/MAXDEPTH/3/g' shader.frag.min
 
 	sed -i 's/\bRay\b/Co/g' shader.frag.min
 	sed -i 's/\bMat\b/Cr/g' shader.frag.min

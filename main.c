@@ -25,15 +25,14 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define WAVE_SAMPLES 1024
 #define DEBUG
 
-GLuint vao;
-GLuint p;
-GLuint waveTex;
-
-fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES];
-fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES];
-
-inline float rand_float() {
-	return (float)rand()/(float)(RAND_MAX);
+uint32_t randomstate = 0xcafebab7;
+float rand_float() {
+	randomstate = randomstate ^ (randomstate << 13u);
+	randomstate = randomstate ^ (randomstate >> 17u);
+	randomstate = randomstate ^ (randomstate << 5u);
+	randomstate *= 1685821657u;
+	uint32_t intermediate = ( (randomstate & 0x007FFFFFu) | 0x3F800000u );
+	return *((float*)(&intermediate)) - 1.0;
 }
 
 float rand_gauss() {
@@ -42,22 +41,29 @@ float rand_gauss() {
 		a = (rand_float()-0.5)*2.0;
 		b = (rand_float()-0.5)*2.0;
 		W = a*a+b*b;
-	} while (W >= 1.0 || W == 0.0);
+	} while (W >= 1.0);
 	return a * sqrt ((-2.0 * log (W)) / W);
 	// return a * mult;
 }
 
+GLuint vao;
+GLuint p;
+GLuint waveTex;
+
+fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES];
+fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES];
+
 float phillips_spectrum(float x, float y) {
 	float scale = 200.0; //m? reciprocal meters?
 	x *= scale; y *= scale; //m???
-	float k = sqrt(x*x+y*y); //m...??
+	float k = x*x+y*y; //m...??
 	float windspeed = 4.0; //m/s
 	float gravity = 9.8; //m/s^2
-	float len = pow(windspeed, 2)/gravity; //m
-	float windx = 0.0; //m/s
-	float windy = 1.0; //m/s
-	float dot = windx*x + windy*y; //m^2/s??
-	return 0.1*exp(-1.0/pow(k*len,2))/pow(k,4)* pow(dot,1.4);
+	float len = (windspeed*windspeed)/gravity; //m
+	// float windx = 0.0; //m/s
+	// float windy = 1.0; //m/s
+	// float dot = windx*x + windy*y; //m^2/s??
+	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.5);
 }
 
 static gboolean
@@ -141,10 +147,9 @@ static void on_realize(GtkGLArea *glarea)
 
 	glGenVertexArrays(1, &vao);
 
-	srand(21);
-	for (int i = 0; i < WAVE_SAMPLES; i++) {
-		for (int j = 0; j < WAVE_SAMPLES; j++) {
-			if (i > 500 || j > 500) break;
+	for (int i = 0; i < WAVE_SAMPLES/2; i++) {
+		for (int j = 0; j < WAVE_SAMPLES/2; j++) {
+			// if (i > 500 || j > 500) break;
 			float x = (float)i/WAVE_SAMPLES;
 			float y = (float)j/WAVE_SAMPLES;
 			// Simulating Ocean Water - Jerry Tessendorf
