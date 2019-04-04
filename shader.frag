@@ -55,6 +55,7 @@ vec3 heightmapNormal(vec2 uv) {
 	return normalize(cross(vec3(epsi.yx, -xdiff), vec3(epsi.xy, -ydiff)));
 }
 
+//http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 float dot2( in vec3 v ) { return dot(v,v); }
 float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 {
@@ -154,7 +155,7 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 1 + donttouch;
+		int maxsamples = 8 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0)));
