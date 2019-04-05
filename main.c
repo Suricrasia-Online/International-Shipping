@@ -116,7 +116,7 @@ static void on_realize(GtkGLArea *glarea)
 
 	//let ppl pass the number of samples they want into the demo
 	char* samples = getenv("SAMPLES");
-	if (samples == NULL) samples = "1000";
+	if (samples == NULL) samples = "1";
 	char defines[512];
 	sprintf(defines, "#version 420\n#define SAMPLES %s\n", samples);
 
