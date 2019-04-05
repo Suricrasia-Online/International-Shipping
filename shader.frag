@@ -55,7 +55,13 @@ float heightmap(vec2 uv) {
 	return texture2D(wave, uv*0.15).x*0.35
 		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.75, 40.0)*0.05
 		+ gaborFilter(uv              , vec2(0.0, 0.3)*0.75, 40.0)*0.1
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.75, 40.0)*0.05;
+		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.75, 40.0)*0.05
+		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.65, 60.0)*0.05
+		+ gaborFilter(uv              , vec2(0.0, 0.3)*0.65, 60.0)*0.1
+		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.5, 60.0)*0.05
+		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.5, 80.0)*0.05
+		+ gaborFilter(uv              , vec2(0.0, 0.3)*0.5, 80.0)*0.1
+		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.5, 80.0)*0.05;
 }
 
 vec3 heightmapNormal(vec2 uv) {
@@ -121,11 +127,11 @@ vec3 sceneGrad(vec3 point) {
 
 void castRay(inout Ray ray) {
 	// Cast ray from origin into scene
-	float dt = 0.01;
+	float dt = 0.008;
 	float lastdiff = 0.0;
 	for (int i = 0; i < 400; i++) {
 		if (distance(ray.m_origin, ray.m_point) > maxdist) return;
-		if (ray.m_point.z > 2.0 || ray.m_point.y > 3.0 || ray.m_point.x > 3.0) return;
+		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
 		float height = heightmap(ray.m_point.xy);
 		float dist2scene = scene(ray.m_point)*0.9;
 		float diff = ray.m_point.z - height;
@@ -141,8 +147,8 @@ void castRay(inout Ray ray) {
 			return;
 		}
 
-		dt = dt*1.01;
-		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z))*64.0,1.0),dist2scene) * ray.m_direction;
+		dt = dt*1.015;
+		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*16.0)*64.0,1.0),dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}
 }
