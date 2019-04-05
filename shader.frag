@@ -1,4 +1,3 @@
-#version 450
 uniform sampler2D wave;
 uniform int donttouch;
 out vec4 fragCol;
@@ -48,7 +47,7 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 }
 
 float heightmap(vec2 uv) {
-	return texture2D(wave, uv*0.15).x*0.33;
+	return texture2D(wave, uv*0.15).x*0.35;
 }
 
 vec3 heightmapNormal(vec2 uv) {
@@ -219,7 +218,7 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 20 + donttouch;
+		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.05);
@@ -229,7 +228,7 @@ void main() {
 			vec3 plateXAxis = normalize(cross(cameraDirection, up));
 			vec3 plateYAxis = normalize(cross(cameraDirection, plateXAxis));
 
-			float fov = radians(40.0);
+			float fov = radians(35.0);
 
 			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * tan(fov /2.0);
 
@@ -239,7 +238,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv)*0.75, 2.0)); //vingetting lol
+		col *= (1.0 - pow(length(uv)*0.75, 2.5)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;

@@ -103,7 +103,15 @@ static void on_realize(GtkGLArea *glarea)
 
 	// compile shader
 	GLuint f = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(f, 1, &shader_frag_min, NULL);
+
+	//let ppl pass the number of samples they want into the demo
+	char* samples = getenv("SAMPLES");
+	if (samples == NULL) samples = "1";
+	char defines[512];
+	sprintf(defines, "#version 450\n#define SAMPLES %s\n", samples);
+
+	const char* shader_frag_list[] = {defines, shader_frag_min};
+	glShaderSource(f, 2, shader_frag_list, NULL);
 	glCompileShader(f);
 
 	#ifdef DEBUG
