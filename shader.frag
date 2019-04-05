@@ -166,12 +166,12 @@ void shadeBoat(inout Ray ray) {
 
 	float ao = mix(1.0,scene(ray.m_point + normal*0.1)/0.1,0.3);
 
-	// float shitty_shadow_approximation = scene(ray.m_point + sundir*0.1) - 
+	float shitty_shadow_approximation = scene(ray.m_point + sundir*0.1) < scene(ray.m_point + sundir*0.2) ? 1.0 : 0.0;
 
 	vec3 diffusecol = vec3(0.8, 0.3, 0.1);
 	float sundot = dot(normal, sundir);
 	sundot = max(sundot, 0.0) + frensel*0.0;
-	ray.m_color += ao * (sundot*suncol*diffusecol + (1.0+normal.z)/2.0 * mix(suncol,skycol,0.6) * diffusecol ) * nearness + specular_sun*suncol + specular_sky * skycol * nearness + skycol*0.02;
+	ray.m_color += ao * (sundot*suncol*diffusecol + (1.0+normal.z)/2.0 * mix(suncol,skycol,0.6) * diffusecol ) * nearness + shitty_shadow_approximation*specular_sun*suncol + specular_sky * skycol * nearness + skycol*0.02;
 }
 
 Ray rayQueue[MAXDEPTH];
