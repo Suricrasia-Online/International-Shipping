@@ -184,7 +184,7 @@ void addToQueue(Ray ray) {
 }
 
 void recursivelyRender(inout Ray ray) {
-	ray.m_point += ray.m_direction*3.5;
+	ray.m_point += ray.m_direction*3.0;
 		rayQueue[0] = ray;
 
 		for (int i = 0; i < MAXDEPTH; i++) {
@@ -219,9 +219,9 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 120 + donttouch;
+		int maxsamples = 20 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
-			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
+			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.05);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
@@ -229,7 +229,7 @@ void main() {
 			vec3 plateXAxis = normalize(cross(cameraDirection, up));
 			vec3 plateYAxis = normalize(cross(cameraDirection, plateXAxis));
 
-			float fov = radians(35.0);
+			float fov = radians(40.0);
 
 			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * tan(fov /2.0);
 
