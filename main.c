@@ -108,7 +108,7 @@ static void on_realize(GtkGLArea *glarea)
 	char* samples = getenv("SAMPLES");
 	if (samples == NULL) samples = "1";
 	char defines[512];
-	sprintf(defines, "#version 450\n#define SAMPLES %s\n", samples);
+	sprintf(defines, "#version 420\n#define SAMPLES %s\n", samples);
 
 	const char* shader_frag_list[] = {defines, shader_frag_min};
 	glShaderSource(f, 2, shader_frag_list, NULL);
