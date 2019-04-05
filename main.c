@@ -74,10 +74,12 @@ float phillips_spectrum(float x, float y) {
 	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.5);
 }
 
+bool rendered = false;
 static gboolean
 on_render (GtkGLArea *glarea, GdkGLContext *context)
 {
-	if (gtk_widget_get_allocated_width((GtkWidget*)glarea) != CANVAS_WIDTH) return TRUE;
+	if (rendered || gtk_widget_get_allocated_width((GtkWidget*)glarea) != CANVAS_WIDTH) return TRUE;
+	rendered = true;
 	glUseProgram(p);
 	glBindVertexArray(vao);
 	glVertexAttrib1f(0, 0);
@@ -114,7 +116,7 @@ static void on_realize(GtkGLArea *glarea)
 
 	//let ppl pass the number of samples they want into the demo
 	char* samples = getenv("SAMPLES");
-	if (samples == NULL) samples = "1";
+	if (samples == NULL) samples = "1000";
 	char defines[512];
 	sprintf(defines, "#version 420\n#define SAMPLES %s\n", samples);
 
