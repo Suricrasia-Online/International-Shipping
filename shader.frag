@@ -54,7 +54,7 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
 	return texture2D(wave, uv*0.15).x*0.35
-		+ (gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.75, 40.0, 0.5)*0.05
+		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.75, 40.0, 0.5)*0.05
 		+ gaborFilter(uv              , vec2(0.0, 0.3)*0.75, 40.0, 1.0)*0.1
 		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.75, 40.0, 1.5)*0.05
 		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.05, 0.2)*0.65, 65.0, 1.0)*0.04
@@ -65,7 +65,7 @@ float heightmap(vec2 uv) {
 		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.15, -0.2)*0.5, 75.0, 2.0)*0.03
 		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.21)*0.5, 103.0, 1.5)*0.07
 		+ gaborFilter(uv              , vec2(0.0, 0.25)*0.5, 103.0, 1.2)*0.13
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.21)*0.5, 103.0, 1.0)*0.07)*1.5;
+		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.21)*0.5, 103.0, 1.0)*0.07;
 }
 
 vec3 heightmapNormal(vec2 uv) {

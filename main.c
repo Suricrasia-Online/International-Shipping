@@ -25,6 +25,14 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define WAVE_SAMPLES 1024
 #define DEBUG
 
+static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
+{
+	if (event->keyval == GDK_KEY_Escape) {
+		gtk_main_quit();
+	}
+	return FALSE;
+}
+
 uint32_t randomstate = 0xcafebaba;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
@@ -190,6 +198,7 @@ void _start() {
 	gtk_container_add(GTK_CONTAINER(win), glarea);
 
 	g_signal_connect(win, "destroy", gtk_main_quit, NULL);
+	g_signal_connect(win, "key_press_event", G_CALLBACK(check_escape), NULL);
 	g_signal_connect(glarea, "realize", G_CALLBACK(on_realize), NULL);
 	g_signal_connect(glarea, "render", G_CALLBACK(on_render), NULL);
 
