@@ -219,7 +219,7 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 10 + donttouch;
+		int maxsamples = 120 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.05);
@@ -240,7 +240,7 @@ void main() {
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
 		col *= (1.0 - pow(length(uv)*0.75, 2.0)); //vingetting lol
-		fragCol = vec4(pow(log(col+1.0), vec3(1.3)), 1.0); //colour grading
+		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
 }
