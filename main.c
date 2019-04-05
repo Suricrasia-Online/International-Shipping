@@ -76,6 +76,22 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 	glUniform1i(0, 0);
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, waveTex);
+
+	for (int i = 0; i < WAVE_SAMPLES/2; i++) {
+		for (int j = 0; j < WAVE_SAMPLES/2; j++) {
+			// if (i > 500 || j > 500) break;
+			float x = (float)i/WAVE_SAMPLES;
+			float y = (float)j/WAVE_SAMPLES;
+			// Simulating Ocean Water - Jerry Tessendorf
+			wavedata_in[i][j] = M_SQRT1_2*(rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
+		}
+	}
+
+	fftwf_plan p = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, 1, 0);
+	fftwf_execute(p);
+
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, WAVE_SAMPLES, WAVE_SAMPLES, 0, GL_RG, GL_FLOAT, wavedata_out);
+
 	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
 	return TRUE;
@@ -147,25 +163,11 @@ static void on_realize(GtkGLArea *glarea)
 
 	glGenVertexArrays(1, &vao);
 
-	for (int i = 0; i < WAVE_SAMPLES/2; i++) {
-		for (int j = 0; j < WAVE_SAMPLES/2; j++) {
-			// if (i > 500 || j > 500) break;
-			float x = (float)i/WAVE_SAMPLES;
-			float y = (float)j/WAVE_SAMPLES;
-			// Simulating Ocean Water - Jerry Tessendorf
-			wavedata_in[i][j] = M_SQRT1_2*(rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
-		}
-	}
-
-	fftwf_plan p = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, 1, 0);
-	fftwf_execute(p);
-
   glEnable(GL_TEXTURE_2D);
   glGenTextures(1, &waveTex);
   glBindTexture(GL_TEXTURE_2D, waveTex);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, WAVE_SAMPLES, WAVE_SAMPLES, 0, GL_RG, GL_FLOAT, wavedata_out);
 }
 
 void _start() {

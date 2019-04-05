@@ -45,7 +45,7 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 }
 
 float heightmap(vec2 uv) {
-	return texture2D(wave, uv*0.1).x*0.7;
+	return texture2D(wave, uv*0.1).x*0.5;
 }
 
 vec3 heightmapNormal(vec2 uv) {
@@ -155,7 +155,7 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 8 + donttouch;
+		int maxsamples = 60 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0)));
@@ -174,8 +174,9 @@ void main() {
 			col += ray.m_color;//*(1.0 - pow(length(uv)*0.85, 3.0));
 		}
 		col /= float(maxsamples);
+		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
 		col *= (1.0 - pow(length(uv)*0.8, 2.0)); //vingetting lol
-		fragCol = vec4(pow(log(col+1.0), vec3(1.3)), 1.0);
+		fragCol = vec4(pow(log(col+1.0), vec3(1.3)), 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
 }
