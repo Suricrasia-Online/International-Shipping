@@ -25,7 +25,7 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define WAVE_SAMPLES 1024
 #define DEBUG
 
-uint32_t randomstate = 0xcafebab7;
+uint32_t randomstate = 0xcafebaba;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
 	randomstate = randomstate ^ (randomstate >> 17u);

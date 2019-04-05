@@ -4,6 +4,9 @@ uniform int donttouch;
 out vec4 fragCol;
 
 float maxdist = 100.0;
+vec3 sundir = normalize(vec3(-1.0,-1.0,0.1));
+vec3 suncol = vec3(1.5,1.04,0.61);
+vec3 skycol = vec3(0.4,0.75,1.0);
 
 uint rand = 0u;
 void stepState()
@@ -34,14 +37,14 @@ struct Ray
 	vec3 m_origin;
 	vec3 m_direction;
 	vec3 m_point;
-	bool m_intersected;
+	int m_intersected;
 	vec3 m_color;
 	vec3 m_attenuation;
 };
 
 Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 		// Create a default ray
-		return Ray(origin, direction, origin, false, vec3(0.0), attenuation);
+		return Ray(origin, direction, origin, 0, vec3(0.0), attenuation);
 }
 
 float heightmap(vec2 uv) {
@@ -77,7 +80,38 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
      dot(nor,pa)*dot(nor,pa)/dot2(nor) );
 }
 
-void castRayWaterSurface(inout Ray ray) {
+
+float scene(vec3 p) {
+	float scale = 3.5;
+	vec3 point = vec3(abs(p.xy), p.z+0.1)*scale;
+	point += sin(point*4.0+1.5)*0.02;
+
+	// return bottle(p4b);
+	vec3 mast = vec3(0.06, 0.0, 1.8);
+	vec3 keel = vec3(0.0, 0.3, 0.0);
+	vec3 port = vec3(0.0, 0.9, 0.7);
+	vec3 port_bow = vec3(1.0, 0.0, 0.0);
+	vec3 bow = vec3(1.9, 0.0, 1.2);
+	vec3 mid = (keel+port)/2.0+vec3(0.02,0.0,0.0);
+
+	float tri1 = udTriangle(point, mast, mid, port_bow)+cos(p.z*500.0)*.0005;
+	float tri2 = udTriangle(point, port, keel, port_bow)+cos(p.x*500.0)*.0005;
+	float tri3 = udTriangle(point, port, bow, port_bow)+cos(p.x*500.0)*.0005;
+
+	// return bottle(p4b);
+	return (min(min(tri2, tri3),tri1)-0.03+cos(p.z*3.0)*.01)/scale;
+}
+
+
+vec3 sceneGrad(vec3 point) {
+    float t = scene(point);
+    return normalize(vec3(
+        t - scene(point + vec3(0.001,0.0,0.0)),
+        t - scene(point + vec3(0.0,0.001,0.0)),
+        t - scene(point + vec3(0.0,0.0,0.001))));
+}
+
+void castRay(inout Ray ray) {
 	// Cast ray from origin into scene
 	float dt = 0.005;
 	float lastdiff = 0.0;
@@ -85,23 +119,29 @@ void castRayWaterSurface(inout Ray ray) {
 		if (distance(ray.m_origin, ray.m_point) > maxdist) return;
 		if (ray.m_point.z > 2.0 || ray.m_point.y > 3.0 || ray.m_point.x > 3.0) return;
 		float height = heightmap(ray.m_point.xy);
+		float dist2scene = scene(ray.m_point)*0.9;
 		float diff = ray.m_point.z - height;
 
+		if (abs(dist2scene) < 0.0001) {
+			ray.m_intersected = 2;
+			return;
+		}
+
 		if (diff < 0.0) {
-			ray.m_point -= dt * diff / (diff - lastdiff) * ray.m_direction;
-			ray.m_intersected = true;
+			ray.m_point -= dt * diff / (diff - lastdiff) * ray.m_direction * 2.0;
+			ray.m_intersected = 1;
 			return;
 		}
 
 		dt = dt*1.01;
-		ray.m_point += dt * ray.m_direction;
+		ray.m_point += min(dt,dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}
 }
 
 //this is trash and needs to be better
 vec3 skyDomeShade(vec3 angle) {
-	return mix(vec3(1.2, 1.0, 0.75),vec3(0.4,0.75,1.0), pow(abs(angle.z), 0.5)) + pow(max(dot(angle, normalize(vec3(-1.0,-1.0,0.1))),0.0),1000.0)*4.0;
+	return mix(vec3(1.71, 1.31, 0.83),skycol, pow(abs(angle.z), 0.5)) + pow(max(dot(angle, sundir),0.0),1000.0)*suncol*4.0;
 }
 
 Ray reflectionForRay(Ray ray, float fade) {
@@ -110,7 +150,28 @@ Ray reflectionForRay(Ray ray, float fade) {
 	vec3 atten = fade * ray.m_attenuation * 0.9 * (1.0 - frensel*0.98);
 	vec3 reflected = reflect(ray.m_direction, normal);
 
-	return newRay(ray.m_point + normal*0.3, reflected, atten);
+	return newRay(ray.m_point + normal*0.01, reflected, atten);
+}
+
+void shadeBoat(inout Ray ray) {
+	//this code is super spaghetti and I'm so fucking sorry
+	vec3 normal = -sceneGrad(ray.m_point);
+	float frensel = abs(dot(ray.m_direction, normal));
+	float nearness = ray.m_point.z - heightmap(ray.m_point.xy);
+	nearness = sqrt(min(nearness*6.0+.1,1.0));
+	vec3 reflected_sun = reflect(sundir, normal);
+	vec3 reflected_sky = reflect(vec3(0.0,0.0,1.0), normal);
+	float specular_sun = pow(max(dot(ray.m_direction, reflected_sun),0.0), 20.0) * (1.0-frensel*0.98);
+	float specular_sky = pow(max(dot(ray.m_direction, reflected_sky)+0.75,0.0)/1.75, 2.0) * (1.0-frensel*0.98);
+
+	float ao = mix(1.0,scene(ray.m_point + normal*0.1)/0.1,0.3);
+
+	// float shitty_shadow_approximation = scene(ray.m_point + sundir*0.1) - 
+
+	vec3 diffusecol = vec3(0.8, 0.3, 0.1);
+	float sundot = dot(normal, sundir);
+	sundot = max(sundot, 0.0) + frensel*0.0;
+	ray.m_color += ao * (sundot*suncol*diffusecol + (1.0+normal.z)/2.0 * mix(suncol,skycol,0.6) * diffusecol ) * nearness + specular_sun*suncol + specular_sky * skycol * nearness + skycol*0.02;
 }
 
 Ray rayQueue[MAXDEPTH];
@@ -128,14 +189,16 @@ void recursivelyRender(inout Ray ray) {
 		for (int i = 0; i < MAXDEPTH; i++) {
 				if (i >= raynum) break;
 
-				castRayWaterSurface(rayQueue[i]);
+				castRay(rayQueue[i]);
 				//shading...
-				float fading = rayQueue[i].m_intersected ? pow(max(maxdist - distance(rayQueue[i].m_origin, rayQueue[i].m_point), 0.0)/maxdist, 2.0) : 0.0;
+				float fading = (rayQueue[i].m_intersected > 0) ? pow(max(maxdist - distance(rayQueue[i].m_origin, rayQueue[i].m_point), 0.0)/maxdist, 2.0) : 0.0;
 				rayQueue[i].m_color = (1.0-fading)*skyDomeShade(rayQueue[i].m_direction);
 				//reflection
-				if (rayQueue[i].m_intersected) {
+				if (rayQueue[i].m_intersected == 1) {
 						addToQueue(reflectionForRay(rayQueue[i], fading));
 				// 		// addToQueue(transmissionForRay(rayQueue[i]));
+				} else if (rayQueue[i].m_intersected == 2) {
+					shadeBoat(rayQueue[i]);
 				}
 		}
 		for (int i = 0; i < raynum; i++) {
@@ -155,10 +218,10 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 60 + donttouch;
+		int maxsamples = 1 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
-			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0)));
+			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.1);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
 			vec3 up = vec3(0.0,0.0,-1.0);
