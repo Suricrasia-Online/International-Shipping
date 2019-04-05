@@ -48,7 +48,7 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 }
 
 float heightmap(vec2 uv) {
-	return texture2D(wave, uv*0.1).x*0.5;
+	return texture2D(wave, uv*0.15).x*0.33;
 }
 
 vec3 heightmapNormal(vec2 uv) {
@@ -82,24 +82,25 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 
 
 float scene(vec3 p) {
+	if (length(p)>0.8) return 1000.0;
 	float scale = 3.5;
 	vec3 point = vec3(abs(p.xy), p.z+0.1)*scale;
-	point += sin(point*4.0+1.5)*0.02;
+	point += sin(point.yzx*6.0)*0.005;
 
 	// return bottle(p4b);
-	vec3 mast = vec3(0.06, 0.0, 1.8);
+	vec3 mast = vec3(0.03, 0.0, 1.8);
 	vec3 keel = vec3(0.0, 0.3, 0.0);
 	vec3 port = vec3(0.0, 0.9, 0.7);
 	vec3 port_bow = vec3(1.0, 0.0, 0.0);
 	vec3 bow = vec3(1.9, 0.0, 1.2);
 	vec3 mid = (keel+port)/2.0+vec3(0.02,0.0,0.0);
 
-	float tri1 = udTriangle(point, mast, mid, port_bow)+cos(p.z*500.0)*.0005;
-	float tri2 = udTriangle(point, port, keel, port_bow)+cos(p.x*500.0)*.0005;
-	float tri3 = udTriangle(point, port, bow, port_bow)+cos(p.x*500.0)*.0005;
+	float tri1 = udTriangle(point, mast, mid, port_bow);
+	float tri2 = udTriangle(point, port, keel, port_bow);
+	float tri3 = udTriangle(point, port, bow, port_bow);
 
 	// return bottle(p4b);
-	return (min(min(tri2, tri3),tri1)-0.03+cos(p.z*3.0)*.01)/scale;
+	return (min(min(tri2, tri3),tri1)-0.01+cos(p.x*8.0)*.005)/scale;
 }
 
 
@@ -218,17 +219,17 @@ void main() {
 
 		vec3 col = vec3(0.0);
 
-		int maxsamples = 1 + donttouch;
+		int maxsamples = 10 + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(4.0, 4.0, heightmap(vec2(4.0, 4.0))+2.0) + normalize(getVec3())*0.04;
-			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.1);
+			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.05);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
 			vec3 up = vec3(0.0,0.0,-1.0);
 			vec3 plateXAxis = normalize(cross(cameraDirection, up));
 			vec3 plateYAxis = normalize(cross(cameraDirection, plateXAxis));
 
-			float fov = radians(40.0);
+			float fov = radians(35.0);
 
 			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * tan(fov /2.0);
 
@@ -238,7 +239,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv)*0.8, 2.0)); //vingetting lol
+		col *= (1.0 - pow(length(uv)*0.75, 2.0)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3)), 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
