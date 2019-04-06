@@ -29,7 +29,14 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
 {
 	if (event->keyval == GDK_KEY_Escape) {
-		gtk_main_quit();
+	asm volatile(".intel_syntax noprefix");
+	asm volatile("push 231"); //exit_group
+	asm volatile("pop rax");
+	// asm volatile("xor edi, edi");
+	asm volatile("syscall");
+	asm volatile(".att_syntax prefix");
+	__builtin_unreachable();
+		// gtk_main_quit();
 	}
 	return FALSE;
 }
