@@ -73,7 +73,7 @@ float phillips_spectrum(float x, float y) {
 	// float windx = 0.0; //m/s
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
-	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.5);
+	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.3);
 }
 
 bool rendered = false;
