@@ -100,11 +100,11 @@ float heightmap(vec2 uv) {
 	float height = texture2D(wave, uv*0.15).x*0.35;
 	float maxdist = 0.05;
 	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + pow(sin(dist*2.0*3.14),2.0)*0.002;//*dist*dist*sqrt(1.0-dist);
+	return height + sin(dist*5.0*3.14)*0.003*dist*dist;//*dist*dist*sqrt(1.0-dist);
 }
 
+vec2 epsi = vec2(0.0005, 0.0);
 vec3 heightmapNormal(vec2 uv) {
-	vec2 epsi = vec2(0.001, 0.0);
 	float xdiff = heightmap(uv) - heightmap(uv+epsi.xy);
 	float ydiff = heightmap(uv) - heightmap(uv+epsi.yx);
 	return normalize(cross(vec3(epsi.yx, -xdiff), vec3(epsi.xy, -ydiff)));
@@ -113,9 +113,9 @@ vec3 heightmapNormal(vec2 uv) {
 vec3 sceneGrad(vec3 point) {
     float t = scene(point);
     return normalize(vec3(
-        t - scene(point + vec3(0.001,0.0,0.0)),
-        t - scene(point + vec3(0.0,0.001,0.0)),
-        t - scene(point + vec3(0.0,0.0,0.001))));
+        t - scene(point + epsi.xyy),
+        t - scene(point + epsi.yxy),
+        t - scene(point + epsi.yyx)));
 }
 
 void castRay(inout Ray ray) {
@@ -157,7 +157,7 @@ Ray reflectionForRay(Ray ray, float fade) {
 	vec3 atten = fade * ray.m_attenuation * 0.9 * (1.0 - frensel*0.98);
 	vec3 reflected = reflect(ray.m_direction, normal);
 
-	return newRay(ray.m_point + normal*0.01, reflected, atten);
+	return newRay(ray.m_point + normal*0.017, reflected, atten);
 }
 
 void shadeBoat(inout Ray ray) {
