@@ -1,5 +1,14 @@
+# ----------------------------------------
+# HEY YOU! YEAH YOU! THE ONE READING THIS!
+# ----------------------------------------
+# Interested in demoscene on linux? join us in
+# the Linux Sizecoding channel! #lsc on IRCNET!
+# ----------------------------------------
 
-all : main
+# not using `pkg-config --libs` here because it will include too many libs
+CFLAGS := `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -Os -std=gnu11 -nostartfiles
+
+all : shipping shipping_party
 
 .PHONY: clean
 
@@ -31,11 +40,16 @@ shader.frag.min : shader.frag Makefile
 shader.h : shader.frag.min Makefile
 	mono ./shader_minifier.exe shader.frag.min -o shader.h
 
-# not using `pkg-config --libs` here because it will include too many libs
-main.elf : main.c shader.h Makefile
-	gcc -o $@ $< `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -Os -std=gnu11 -nostartfiles #-nostdlib
+shipping.elf : shipping.c shader.h Makefile
+	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1"'
 
-main : main_opt.elf.packed
+shipping_party.elf : shipping.c shader.h Makefile
+	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1000"'
+
+shipping : shipping_opt.elf.packed
+	mv $< $@
+
+shipping_party : shipping_party_opt.elf.packed
 	mv $< $@
 
 #all the rest of these rules just takes a compiled elf file and generates a packed version of it with vondehi
@@ -65,4 +79,4 @@ main : main_opt.elf.packed
 	wc -c $@
 
 clean :
-	-rm *.elf shader.h main
+	-rm *.elf shader.h shipping

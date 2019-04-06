@@ -1,0 +1,20 @@
+| ------------------------------------ |
+| // INTERNATIONAL SHIPPING ////////// |
+| ------------------------------------ |
+| ~a 4k gfx demo by suricrasia online~ |
+| for ubuntu 18.10 and nvidia graphics |
+| ------------------------------------ |
+| libs needed: -lGL -lgtk-3 -lgdk-3    |
+|              -lgobject-2.0 -lfftw3f  |
+| ------------------------------------ |
+| execution instructions:              |
+| note to orgas: use ./shipping_party  |
+| ~$ ./shipping                        |
+| or, to choose the number of samples: |
+| ~$ env SAMPLES=10 ./shipping         |
+| by default it is 1, but in the party |
+| version it is set to 1000 samples.   |
+| ------------------------------------ |
+| don't kill your gpu!                 |
+|                  render responsibly! |
+| ------------------------------------ |

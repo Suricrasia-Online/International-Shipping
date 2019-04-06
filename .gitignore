@@ -1,4 +1,5 @@
 *.elf
-main
+shipping
+shipping_party
 shader.h
 shader.frag.min
