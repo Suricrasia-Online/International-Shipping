@@ -6,7 +6,7 @@
 # ----------------------------------------
 
 # not using `pkg-config --libs` here because it will include too many libs
-CFLAGS := `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -Os -std=gnu11 -nostartfiles
+CFLAGS := `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -Os -std=gnu11 -nostartfiles -Wall
 
 all : shipping shipping_party
 

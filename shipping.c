@@ -73,6 +73,7 @@ float phillips_spectrum(float x, float y) {
 	// float windx = 0.0; //m/s
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
+	if (k > WAVE_SAMPLES/4) return 0.0;
 	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.3);
 }
 
@@ -99,8 +100,8 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 		}
 	}
 
-	fftwf_plan p = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, FFTW_BACKWARD, FFTW_MEASURE);
-	fftwf_execute(p);
+	fftwf_plan plan = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, FFTW_BACKWARD, FFTW_MEASURE);
+	fftwf_execute(plan);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, WAVE_SAMPLES, WAVE_SAMPLES, 0, GL_RG, GL_FLOAT, wavedata_out);
 
