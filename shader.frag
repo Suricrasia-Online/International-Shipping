@@ -118,7 +118,7 @@ float heightmap(vec2 uv) {
 	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
 	float maxdist = 0.05;
 	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + sin(dist*15.70)*0.001*dist*dist + wake(vec2(0.28,0.0)-uv)*0.2;//*dist*dist*sqrt(1.0-dist);
+	return height + sin(dist*15.70)*0.001*dist*dist + wake(vec2(0.28,0.0)-uv)*0.1;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);

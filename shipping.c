@@ -74,7 +74,7 @@ float phillips_spectrum(float x, float y) {
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/4) return 0.0;
-	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.3);
+	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.4);
 }
 
 bool rendered = false;
