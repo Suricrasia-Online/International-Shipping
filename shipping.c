@@ -68,9 +68,9 @@ float phillips_spectrum(float x, float y) {
 	float scale = 200.0; //m? reciprocal meters?
 	x *= scale; y *= scale; //m???
 	float k = x*x+y*y; //m...??
-	float windspeed = 3.5; //m/s
-	float gravity = 9.8; //m/s^2
-	float len = (windspeed*windspeed)/gravity; //m
+	// float windspeed = 3.5; //m/s
+	// float gravity = 9.8; //m/s^2
+	float len = 1.25; //m
 	// float windx = 0.0; //m/s
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??

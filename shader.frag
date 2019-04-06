@@ -6,7 +6,7 @@ float maxdist = 100.0;
 vec3 sundir = normalize(vec3(-1.0,-1.0,0.1));
 vec3 suncol = vec3(1.5,1.04,0.61);
 vec3 skycol = vec3(0.4,0.75,1.0);
-float height_at_origin = 0.0;
+// float height_at_origin = 0.0;
 
 uint rand = 0u;
 void stepState()
@@ -71,7 +71,7 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 
 
 float scene(vec3 p) {
-	vec3 point = vec3(abs(p.xy), p.z-height_at_origin+0.08);
+	vec3 point = vec3(abs(p.xy), p.z+0.05);
 	if (length(point)>0.8) return 0.8;
 	float scale = 3.5;
 	point *= scale;
@@ -83,7 +83,8 @@ float scene(vec3 p) {
 	vec3 port = vec3(0.0, 0.9, 0.7);
 	vec3 port_bow = vec3(1.0, 0.0, 0.0);
 	vec3 bow = vec3(1.9, 0.0, 1.2);
-	vec3 mid = (keel+port)/2.0+vec3(0.02,-0.1,0.0);
+	vec3 mid = vec3(0.02, 0.5, 0.4);
+	// vec3 mid = (keel+port)/2.0+vec3(0.02,-0.1,0.0);
 
 	float tri1 = udTriangle(point, mast, mid, port_bow);
 	float tri2 = udTriangle(point, port, keel, port_bow);
@@ -110,7 +111,7 @@ float wake(vec2 uv) {
 
 	float distance = 1.6*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-(distance*4.0+wakeangledot*0.5)*4.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*16.0-wakeangledot*2.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
@@ -238,20 +239,19 @@ void main() {
 		vec2 uv = (gl_FragCoord.xy - vec2(960.0, 540.0))/vec2(960.0, 960.0);
 		// fragCol = vec4((1.0+wake(uv))/2.0);
 
-		fragCol = vec4(exp(10.0*-pow(max(uv.x,0.0)*0.5,2.0)));
 		feed(uv.x);
 		feed(uv.y);
 
 		// Camera parameters
 
 		vec3 col = vec3(0.0);
-		height_at_origin = heightmap(vec2(0.0));
+		// height_at_origin = heightmap(vec2(0.0));
 		// height_at_origin = heightmap(vec2(0.0));
 
 		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
-			vec3 focusOrigin = vec3(0.0, 0.0, height_at_origin+.14);
+			vec3 focusOrigin = vec3(0.0, 0.0, 0.15);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
 			vec3 up = vec3(0.0,0.0,-1.0);
