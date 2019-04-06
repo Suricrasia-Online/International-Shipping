@@ -110,7 +110,7 @@ float wake(vec2 uv) {
 
 	float distance = sqrt(xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm))+0.02);
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sin(distance*120.0)*pow(exp(-pow(max(distance*2.0,wakeangledot*0.6),2.0)*4.0),2.0)*min((distance-sqrt(0.02))*0.8,1.0);//*xfalloff;
+	return sin(distance*120.0)*pow(exp(-pow(max(distance*2.0,wakeangledot*0.6),2.0)*4.0),2.0)*min((distance-0.14)*0.8,1.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
@@ -118,7 +118,7 @@ float heightmap(vec2 uv) {
 	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
 	float maxdist = 0.05;
 	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + sin(dist*5.0*3.14)*0.001*dist*dist + wake(vec2(0.28,0.0)-uv)*0.2;//*dist*dist*sqrt(1.0-dist);
+	return height + sin(dist*15.70)*0.001*dist*dist + wake(vec2(0.28,0.0)-uv)*0.2;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);

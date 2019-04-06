@@ -70,7 +70,7 @@ shipping_party : shipping_party_opt.elf.packed
 
 %.xz : % Makefile
 	-rm $@
-	lzma --format=lzma -9 --extreme --lzma1=preset=9,lc=1,lp=0,pb=1,nice=270,depth=64,dict=16384 --keep --stdout $< > $@
+	lzma --format=lzma -9 --extreme --lzma1=preset=9,lc=0,lp=0,pb=0,nice=270,depth=32,dict=16384 --keep --stdout $< > $@
 	wc -c $@
 
 %.packed : %.xz packer Makefile
