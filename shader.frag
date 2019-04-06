@@ -106,19 +106,19 @@ float wake(vec2 uv) {
 	float wakeangleflippeddot = dot(uvm,wakeangleflipped);
 
 	// float xfalloff = exp(10.0*-pow(max(uvm.x,0.0)*0.5,2.0));
-	float xwiggly = 1.0-sigmoid(1.3*wakeangledot);
+	float xwiggly = sqrt(1.0-sigmoid(4.0*wakeangledot));
 
-	float distance = sqrt(xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm))+0.02);
+	float distance = 1.6*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sin(distance*120.0)*pow(exp(-pow(max(distance*2.0,wakeangledot*0.6),2.0)*4.0),2.0)*min((distance-0.14)*0.8,1.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-(distance*4.0+wakeangledot*0.5)*4.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
 	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
 	float maxdist = 0.05;
-	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + sin(dist*15.70)*0.001*dist*dist + wake(vec2(0.28,0.0)-uv)*0.1;//*dist*dist*sqrt(1.0-dist);
+	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
+	return height + /*sin(dist*10.70)*0.001*dist*dist +*/ (wake(vec2(0.27,0.0)-uv)+wake(vec2(-0.2,0.0)-uv)*0.15)*0.015;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -236,9 +236,9 @@ void recursivelyRender(inout Ray ray) {
 void main() {
 		// Normalized pixel coordinates (from -1 to 1)
 		vec2 uv = (gl_FragCoord.xy - vec2(960.0, 540.0))/vec2(960.0, 960.0);
+		// fragCol = vec4((1.0+wake(uv))/2.0);
 
-		// fragCol = vec4(exp(10.0*-pow(max(uv.x,0.0)*0.5,2.0)));
-
+		fragCol = vec4(exp(10.0*-pow(max(uv.x,0.0)*0.5,2.0)));
 		feed(uv.x);
 		feed(uv.y);
 
@@ -271,5 +271,5 @@ void main() {
 		col *= (1.0 - pow(length(uv)*0.75, 2.5)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
-		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
+		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;*/
 }

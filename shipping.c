@@ -22,7 +22,8 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 
 #define CANVAS_WIDTH 1920
 #define CANVAS_HEIGHT 1080
-#define WAVE_SAMPLES 2048
+#define SCANLINE_SIZE 10
+#define WAVE_SAMPLES 1024
 #define DEBUG
 
 static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
@@ -64,7 +65,7 @@ fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned_
 fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16)));
 
 float phillips_spectrum(float x, float y) {
-	float scale = 400.0; //m? reciprocal meters?
+	float scale = 200.0; //m? reciprocal meters?
 	x *= scale; y *= scale; //m???
 	float k = x*x+y*y; //m...??
 	float windspeed = 3.5; //m/s
@@ -73,7 +74,7 @@ float phillips_spectrum(float x, float y) {
 	// float windx = 0.0; //m/s
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
-	if (k > WAVE_SAMPLES/4) return 0.0;
+	if (k > WAVE_SAMPLES/2) return 0.0;
 	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.4);
 }
 
@@ -90,8 +91,8 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, waveTex);
 
-	for (int i = 0; i < WAVE_SAMPLES/4; i++) {
-		for (int j = 0; j < WAVE_SAMPLES/4; j++) {
+	for (int i = 0; i < WAVE_SAMPLES/2; i++) {
+		for (int j = 0; j < WAVE_SAMPLES/2; j++) {
 			// if (i > 500 || j > 500) break;
 			float x = (float)i/WAVE_SAMPLES;
 			float y = (float)j/WAVE_SAMPLES;
@@ -105,7 +106,14 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, WAVE_SAMPLES, WAVE_SAMPLES, 0, GL_RG, GL_FLOAT, wavedata_out);
 
-	glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+  glEnable(GL_SCISSOR_TEST);
+  for (int i = 0; i < CANVAS_HEIGHT; i += SCANLINE_SIZE) {
+	  glScissor(0,i,1920,SCANLINE_SIZE);
+		glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+		glFinish();
+		while (gtk_events_pending()) gtk_main_iteration();
+  }
+
 
 	return TRUE;
 }
