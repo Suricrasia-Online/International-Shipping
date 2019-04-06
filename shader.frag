@@ -244,7 +244,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv)*0.78, 2.5)); //vingetting lol
+		col *= (1.0 - pow(length(uv)*0.75, 2.5)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
