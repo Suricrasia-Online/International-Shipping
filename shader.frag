@@ -95,10 +95,10 @@ float scene(vec3 p) {
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.15).x*0.35;
+	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
 	float maxdist = 0.05;
 	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + sin(dist*5.0*3.14)*0.003*dist*dist;//*dist*dist*sqrt(1.0-dist);
+	return height + sin(dist*5.0*3.14)*0.002*dist*dist;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -227,7 +227,7 @@ void main() {
 		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
-			vec3 focusOrigin = vec3(0.0, 0.0, height_at_origin+.1);
+			vec3 focusOrigin = vec3(0.0, 0.0, height_at_origin+.14);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
 			vec3 up = vec3(0.0,0.0,-1.0);
@@ -244,7 +244,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv)*0.75, 2.5)); //vingetting lol
+		col *= (1.0 - pow(length(uv)*0.78, 2.5)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;
