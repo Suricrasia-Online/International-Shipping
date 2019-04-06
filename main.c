@@ -22,7 +22,7 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 
 #define CANVAS_WIDTH 1920
 #define CANVAS_HEIGHT 1080
-#define WAVE_SAMPLES 1024
+#define WAVE_SAMPLES 2048
 #define DEBUG
 
 static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
@@ -34,7 +34,8 @@ static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer dat
 }
 
 // uint32_t randomstate = 0x6b873edd;
-uint32_t randomstate = 0x31debeab;
+// uint32_t randomstate = 0x31debeab;
+uint32_t randomstate = 0x96fcd33;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
 	randomstate = randomstate ^ (randomstate >> 17u);
@@ -59,14 +60,14 @@ GLuint vao;
 GLuint p;
 GLuint waveTex;
 
-fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES];
-fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES];
+fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16)));
+fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16)));
 
 float phillips_spectrum(float x, float y) {
-	float scale = 200.0; //m? reciprocal meters?
+	float scale = 400.0; //m? reciprocal meters?
 	x *= scale; y *= scale; //m???
 	float k = x*x+y*y; //m...??
-	float windspeed = 4.0; //m/s
+	float windspeed = 3.5; //m/s
 	float gravity = 9.8; //m/s^2
 	float len = (windspeed*windspeed)/gravity; //m
 	// float windx = 0.0; //m/s
@@ -88,8 +89,8 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 	glActiveTexture(GL_TEXTURE0 + 0);
 	glBindTexture(GL_TEXTURE_2D, waveTex);
 
-	for (int i = 0; i < WAVE_SAMPLES/2; i++) {
-		for (int j = 0; j < WAVE_SAMPLES/2; j++) {
+	for (int i = 0; i < WAVE_SAMPLES/4; i++) {
+		for (int j = 0; j < WAVE_SAMPLES/4; j++) {
 			// if (i > 500 || j > 500) break;
 			float x = (float)i/WAVE_SAMPLES;
 			float y = (float)j/WAVE_SAMPLES;
@@ -98,7 +99,7 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 		}
 	}
 
-	fftwf_plan p = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, 1, 0);
+	fftwf_plan p = fftwf_plan_dft_2d(WAVE_SAMPLES, WAVE_SAMPLES, (fftwf_complex*)wavedata_in, (fftwf_complex*)wavedata_out, FFTW_BACKWARD, FFTW_MEASURE);
 	fftwf_execute(p);
 
   glTexImage2D(GL_TEXTURE_2D, 0, GL_RG32F, WAVE_SAMPLES, WAVE_SAMPLES, 0, GL_RG, GL_FLOAT, wavedata_out);

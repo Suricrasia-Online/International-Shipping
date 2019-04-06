@@ -47,7 +47,6 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 		return Ray(origin, direction, origin, 0, vec3(0.0), attenuation);
 }
 
-
 //http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 float dot2( in vec3 v ) { return dot(v,v); }
 float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
@@ -95,7 +94,6 @@ float scene(vec3 p) {
 }
 
 float heightmap(vec2 uv) {
-	float angle = atan(uv.y/uv.x);//*10.0;
 	//lots of random ripples uwu
 	float height = texture2D(wave, uv*0.15).x*0.35;
 	float maxdist = 0.05;
@@ -125,9 +123,8 @@ void castRay(inout Ray ray) {
 	for (int i = 0; i < 400; i++) {
 		if (distance(ray.m_origin, ray.m_point) > maxdist) return;
 		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
-		float height = heightmap(ray.m_point.xy);
 		float dist2scene = scene(ray.m_point)*0.9;
-		float diff = ray.m_point.z - height;
+		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
 
 		if (abs(dist2scene) < 0.0001) {
 			ray.m_intersected = 2;
@@ -135,7 +132,7 @@ void castRay(inout Ray ray) {
 		}
 
 		if (diff < 0.0) {
-			ray.m_point -= dt * diff / (diff - lastdiff) * ray.m_direction * 2.0;
+			ray.m_point -= dt * diff / (diff - lastdiff) * ray.m_direction;
 			ray.m_intersected = 1;
 			return;
 		}
@@ -225,6 +222,7 @@ void main() {
 
 		vec3 col = vec3(0.0);
 		height_at_origin = heightmap(vec2(0.0));
+		// height_at_origin = heightmap(vec2(0.0));
 
 		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
