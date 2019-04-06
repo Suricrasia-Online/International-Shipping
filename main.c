@@ -33,7 +33,8 @@ static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer dat
 	return FALSE;
 }
 
-uint32_t randomstate = 0xcafebaba;
+// uint32_t randomstate = 0x6b873edd;
+uint32_t randomstate = 0x31debeab;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
 	randomstate = randomstate ^ (randomstate >> 17u);
@@ -190,6 +191,14 @@ static void on_realize(GtkGLArea *glarea)
 
 void _start() {
 	asm volatile("sub $8, %rsp\n");
+
+#ifdef GEN_BOATS
+	srand(time(0));
+	srand(rand());
+	randomstate = rand();
+	randomstate = rand();
+	printf("%p\n", randomstate);
+#endif
 
 	typedef void (*voidWithOneParam)(int*);
 	voidWithOneParam gtk_init_one_param = (voidWithOneParam)gtk_init;

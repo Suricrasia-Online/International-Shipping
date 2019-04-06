@@ -6,6 +6,7 @@ float maxdist = 100.0;
 vec3 sundir = normalize(vec3(-1.0,-1.0,0.1));
 vec3 suncol = vec3(1.5,1.04,0.61);
 vec3 skycol = vec3(0.4,0.75,1.0);
+float height_at_origin = 0.0;
 
 uint rand = 0u;
 void stepState()
@@ -31,11 +32,6 @@ vec3 getVec3() {
 	return vec3(getFloat(),getFloat(),getFloat());
 }
 
-float gaborFilter(vec2 uv, vec2 dir, float omega, float lambda) {
-	vec2 coords = uv * mat2(dir.x, dir.y, -dir.y, dir.x)/pow(length(dir),2.0);
-	return exp(-pow(length(coords),2.0)) * cos(coords.x * omega + lambda) / omega;
-}
-
 struct Ray
 {
 	vec3 m_origin;
@@ -51,29 +47,6 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 		return Ray(origin, direction, origin, 0, vec3(0.0), attenuation);
 }
 
-float heightmap(vec2 uv) {
-	//lots of random ripples uwu
-	return texture2D(wave, uv*0.15).x*0.35
-		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.2)*0.75, 40.0, 0.5)*0.05
-		+ gaborFilter(uv              , vec2(0.0, 0.3)*0.75, 40.0, 1.0)*0.1
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.2)*0.75, 40.0, 1.5)*0.05
-		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.05, 0.2)*0.65, 65.0, 1.0)*0.04
-		+ gaborFilter(uv              , vec2(0.0, 0.28)*0.65, 70.0, 1.5)*0.09
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.05, -0.2)*0.5, 65.0, 1.0)*0.04
-		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.15, 0.2)*0.5, 77.0, 2.0)*0.03
-		+ gaborFilter(uv              , vec2(0.0, 0.32)*0.5, 76.0, 2.5)*0.08
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.15, -0.2)*0.5, 75.0, 2.0)*0.03
-		+ gaborFilter(uv-vec2(0.2,0.0), vec2(0.1, 0.21)*0.5, 103.0, 1.5)*0.07
-		+ gaborFilter(uv              , vec2(0.0, 0.25)*0.5, 103.0, 1.2)*0.13
-		+ gaborFilter(uv+vec2(0.2,0.0), vec2(0.1, -0.21)*0.5, 103.0, 1.0)*0.07;
-}
-
-vec3 heightmapNormal(vec2 uv) {
-	vec2 epsi = vec2(0.001, 0.0);
-	float xdiff = heightmap(uv) - heightmap(uv+epsi.xy);
-	float ydiff = heightmap(uv) - heightmap(uv+epsi.yx);
-	return normalize(cross(vec3(epsi.yx, -xdiff), vec3(epsi.xy, -ydiff)));
-}
 
 //http://iquilezles.org/www/articles/distfunctions/distfunctions.htm
 float dot2( in vec3 v ) { return dot(v,v); }
@@ -99,9 +72,10 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 
 
 float scene(vec3 p) {
-	if (length(p)>0.8) return 1000.0;
+	vec3 point = vec3(abs(p.xy), p.z-height_at_origin+0.08);
+	if (length(point)>0.8) return 0.8;
 	float scale = 3.5;
-	vec3 point = vec3(abs(p.xy), p.z+0.1)*scale;
+	point *= scale;
 	point += sin(point.yzx*6.0)*0.005;
 
 	// return bottle(p4b);
@@ -110,7 +84,7 @@ float scene(vec3 p) {
 	vec3 port = vec3(0.0, 0.9, 0.7);
 	vec3 port_bow = vec3(1.0, 0.0, 0.0);
 	vec3 bow = vec3(1.9, 0.0, 1.2);
-	vec3 mid = (keel+port)/2.0+vec3(0.02,0.0,0.0);
+	vec3 mid = (keel+port)/2.0+vec3(0.02,-0.1,0.0);
 
 	float tri1 = udTriangle(point, mast, mid, port_bow);
 	float tri2 = udTriangle(point, port, keel, port_bow);
@@ -120,6 +94,21 @@ float scene(vec3 p) {
 	return (min(min(tri2, tri3),tri1)-0.01+cos(p.x*8.0)*.005)/scale;
 }
 
+float heightmap(vec2 uv) {
+	float angle = atan(uv.y/uv.x);//*10.0;
+	//lots of random ripples uwu
+	float height = texture2D(wave, uv*0.15).x*0.35;
+	float maxdist = 0.05;
+	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
+	return height + pow(sin(dist*2.0*3.14),2.0)*0.002;//*dist*dist*sqrt(1.0-dist);
+}
+
+vec3 heightmapNormal(vec2 uv) {
+	vec2 epsi = vec2(0.001, 0.0);
+	float xdiff = heightmap(uv) - heightmap(uv+epsi.xy);
+	float ydiff = heightmap(uv) - heightmap(uv+epsi.yx);
+	return normalize(cross(vec3(epsi.yx, -xdiff), vec3(epsi.xy, -ydiff)));
+}
 
 vec3 sceneGrad(vec3 point) {
     float t = scene(point);
@@ -235,11 +224,12 @@ void main() {
 		// Camera parameters
 
 		vec3 col = vec3(0.0);
+		height_at_origin = heightmap(vec2(0.0));
 
 		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
 			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
-			vec3 focusOrigin = vec3(0.0, 0.0, heightmap(vec2(0.0))+.05);
+			vec3 focusOrigin = vec3(0.0, 0.0, height_at_origin+.1);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
 
 			vec3 up = vec3(0.0,0.0,-1.0);
