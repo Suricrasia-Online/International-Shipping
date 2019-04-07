@@ -3,9 +3,9 @@ uniform int donttouch;
 out vec4 fragCol;
 
 float maxdist = 100.0;
-vec3 sundir = normalize(vec3(-1.0,-1.0,0.1));
-vec3 suncol = vec3(1.5,1.04,0.61);
+vec3 suncol = vec3(1.5,1.0,0.6);
 vec3 skycol = vec3(0.4,0.75,1.0);
+vec3 sundir = normalize(vec3(-1.0,-1.0,0.1));
 // float height_at_origin = 0.0;
 
 uint rand = 0u;
@@ -237,11 +237,11 @@ void recursivelyRender(inout Ray ray) {
 
 void main() {
 		// Normalized pixel coordinates (from -1 to 1)
-		vec2 uv = (gl_FragCoord.xy - vec2(960.0, 540.0))/vec2(960.0, 960.0);
+		vec2 uv_base = (gl_FragCoord.xy - vec2(960.0, 540.0))/vec2(960.0, 960.0);
 		// fragCol = vec4((1.0+wake(uv))/2.0);
 
-		feed(uv.x);
-		feed(uv.y);
+		feed(uv_base.x);
+		feed(uv_base.y);
 
 		// Camera parameters
 
@@ -251,6 +251,7 @@ void main() {
 
 		int maxsamples = SAMPLES + donttouch;
 		for (int i = 0; i < maxsamples; i++) {
+			vec2 uv = uv_base + getVec3().xy/500.0;
 			vec3 cameraOrigin = vec3(3.5, 3.5, heightmap(vec2(3.5, 3.5))+1.5) + normalize(getVec3())*0.04;
 			vec3 focusOrigin = vec3(0.0, 0.0, 0.15);
 			vec3 cameraDirection = normalize(focusOrigin-cameraOrigin);
@@ -269,7 +270,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv)*0.75, 2.5)); //vingetting lol
+		col *= (1.0 - pow(length(uv_base)*0.75, 2.5)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;*/
