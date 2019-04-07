@@ -8,9 +8,9 @@
 # not using `pkg-config --libs` here because it will include too many libs
 CFLAGS := `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -O1 -std=gnu11 -nostartfiles -Wall -Wextra
 
-all : shipping shipping_party
+all : shipping shipping_party check_size
 
-.PHONY: clean
+.PHONY: clean check_size
 
 packer : vondehi/vondehi.asm 
 	cd vondehi; nasm -fbin -o vondehi vondehi.asm
@@ -65,18 +65,18 @@ shipping_party : shipping_party_opt.elf.packed
 	sed -i 's/__bss_start/\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00/g' $@;
 	sed -i 's/_end/\x00\x00\x00\x00/g' $@;
 
-	wc -c $@
 	chmod +x $@
 
 %.xz : % Makefile
 	-rm $@
 	lzma --format=lzma -9 --extreme --lzma1=preset=9,lc=0,lp=0,pb=0,nice=40,depth=16,dict=16384 --keep --stdout $< > $@
-	wc -c $@
 
 %.packed : %.xz packer Makefile
 	cat ./vondehi/vondehi $< > $@
 	chmod +x $@
-	wc -c $@
 
 clean :
 	-rm *.elf *.xz shader.h shipping
+
+check_size :
+	./sizelimit_check.sh

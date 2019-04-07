@@ -89,7 +89,7 @@ float phillips_spectrum(float x, float y) {
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/2) return 0.0;
-	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,p1d40);
+	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,p1d20);
 }
 
 static gboolean
