@@ -94,24 +94,25 @@ float scene(vec3 p) {
 	return (min(min(tri2, tri3),tri1)-0.01+cos(p.x*8.0)*.005)/scale;
 }
 
-float sigmoid(float x) {
-	return x/(1.0+abs(x));
-}
+// float sigmoid(float x) {
+// 	return x/(1.0+abs(x));
+// }
 
 float wake(vec2 uv) {
 	vec2 uvm = vec2(uv.x,abs(uv.y));
-	vec2 wakeangle = normalize(vec2(1.0,0.5));
+	vec2 wakeangle = normalize(vec2(1.0,0.9));
 	vec2 wakeangleflipped = vec2(wakeangle.y,-wakeangle.x);
 
 	float wakeangledot = dot(uvm,wakeangle);
 	float wakeangleflippeddot = dot(uvm,wakeangleflipped);
 
 	// float xfalloff = exp(10.0*-pow(max(uvm.x,0.0)*0.5,2.0));
-	float xwiggly = sqrt(1.0-sigmoid(4.0*wakeangledot));
 
-	float distance = 1.6*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
+	float xwiggly = sqrt(1.0-8.0*wakeangledot/(1.0+8.0*abs(wakeangledot)));
+
+	float distance = 1.5*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*16.0-wakeangledot*2.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*16.0-wakeangledot*3.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
@@ -119,7 +120,7 @@ float heightmap(vec2 uv) {
 	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
 	float maxdist = 0.05;
 	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + /*sin(dist*10.70)*0.001*dist*dist +*/ (wake(vec2(0.27,0.0)-uv)+wake(vec2(-0.2,0.0)-uv)*0.15)*0.015;//*dist*dist*sqrt(1.0-dist);
+	return height + /*sin(dist*10.70)*0.001*dist*dist +*/ (wake(vec2(0.26,0.0)-uv)+wake(vec2(0.0,0.0)-uv))*0.015;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -147,7 +148,7 @@ void castRay(inout Ray ray) {
 		float dist2scene = scene(ray.m_point)*0.9;
 		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
 
-		if (abs(dist2scene) < 0.0001) {
+		if (abs(dist2scene) < epsi.x) {
 			ray.m_intersected = 2;
 			return;
 		}
@@ -158,7 +159,7 @@ void castRay(inout Ray ray) {
 			return;
 		}
 
-		dt = dt*1.015;
+		dt = dt*1.018;
 		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*16.0)*64.0,1.0),dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}

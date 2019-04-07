@@ -17,6 +17,8 @@
 #include <complex.h>
 #include <fftw3.h>
 
+#include "floats.h"
+
 #include "shader.h"
 const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xyxx,y.yxxx,y.xxxx};void main(){gl_Position=x[gl_VertexID];}";
 
@@ -26,13 +28,14 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define WAVE_SAMPLES 1024
 #define DEBUG
 
-static gboolean check_escape(GtkWidget *widget, GdkEventKey *event, gpointer data)
+static gboolean check_escape(GtkWidget *widget, GdkEventKey *event)
 {
+	(void)widget;
 	if (event->keyval == GDK_KEY_Escape) {
 	asm volatile(".intel_syntax noprefix");
 	asm volatile("push 231"); //exit_group
 	asm volatile("pop rax");
-	// asm volatile("xor edi, edi");
+	asm volatile("xor edi, edi");
 	asm volatile("syscall");
 	asm volatile(".att_syntax prefix");
 	__builtin_unreachable();
@@ -53,6 +56,7 @@ float rand_float() {
 	return *((float*)(&intermediate)) - 1.0;
 }
 
+// I should've made this a sum of 12 random floats, subtracted by 6, but it's too late now :c
 float rand_gauss() {
 	float a, b, W;
 	do {
@@ -68,8 +72,11 @@ GLuint vao;
 GLuint p;
 GLuint waveTex;
 
-fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16)));
-fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16)));
+fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16))) = {0};
+fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16))) = {0};
+
+bool rendered = false;
+bool flipped = false;
 
 float phillips_spectrum(float x, float y) {
 	float scale = 200.0; //m? reciprocal meters?
@@ -82,14 +89,16 @@ float phillips_spectrum(float x, float y) {
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/2) return 0.0;
-	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,1.4);
+	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,p1d40);
 }
 
-bool rendered = false;
 static gboolean
 on_render (GtkGLArea *glarea, GdkGLContext *context)
 {
+	(void)context;
 	if (rendered || gtk_widget_get_allocated_width((GtkWidget*)glarea) != CANVAS_WIDTH) return TRUE;
+	if (!flipped) { gtk_gl_area_queue_render(glarea); flipped = true; return TRUE; }
+
 	rendered = true;
 	glUseProgram(p);
 	glBindVertexArray(vao);
