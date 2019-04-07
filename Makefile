@@ -79,4 +79,4 @@ shipping_party : shipping_party_opt.elf.packed
 	wc -c $@
 
 clean :
-	-rm *.elf shader.h shipping
+	-rm *.elf *.xz shader.h shipping

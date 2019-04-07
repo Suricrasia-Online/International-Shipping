@@ -117,8 +117,8 @@ float wake(vec2 uv) {
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.15-vec2(0.005)).x*0.35;
-	float maxdist = 0.05;
+	float height = texture2D(wave, uv*0.16).x*0.35;
+	// float maxdist = 0.05;
 	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
 	return height + /*sin(dist*10.70)*0.001*dist*dist +*/ (wake(vec2(0.26,0.0)-uv)+wake(vec2(0.0,0.0)-uv))*0.015;//*dist*dist*sqrt(1.0-dist);
 }
@@ -143,7 +143,7 @@ void castRay(inout Ray ray) {
 	float dt = 0.008;
 	float lastdiff = 0.0;
 	for (int i = 0; i < 400; i++) {
-		if (distance(ray.m_origin, ray.m_point) > maxdist) return;
+		if (length(ray.m_origin - ray.m_point) > maxdist) return;
 		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
 		float dist2scene = scene(ray.m_point)*0.9;
 		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
@@ -259,9 +259,9 @@ void main() {
 			vec3 plateXAxis = normalize(cross(cameraDirection, up));
 			vec3 plateYAxis = normalize(cross(cameraDirection, plateXAxis));
 
-			float fov = radians(35.0);
+			// float fov = radians(35.0);
 
-			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * tan(fov /2.0);
+			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * 0.32;
 
 			Ray ray = newRay(cameraOrigin, normalize(platePoint + cameraDirection), vec3(1.0));
 			recursivelyRender(ray);
