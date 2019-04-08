@@ -71,7 +71,7 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 
 
 float scene(vec3 p) {
-	vec3 point = vec3(abs(p.xy), p.z+0.05);
+	vec3 point = vec3(abs(p.xy), p.z+0.06);
 	if (length(point)>0.8) return 0.8;
 	float scale = 3.5;
 	point *= scale;
