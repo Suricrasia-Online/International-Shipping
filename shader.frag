@@ -262,7 +262,7 @@ void main() {
 
 			// float fov = radians(35.0);
 
-			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * 0.32;
+			vec3 platePoint = (plateXAxis * -uv.x + plateYAxis * uv.y) * 0.3;
 
 			Ray ray = newRay(cameraOrigin, normalize(platePoint + cameraDirection), vec3(1.0));
 			recursivelyRender(ray);
