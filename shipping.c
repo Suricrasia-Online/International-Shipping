@@ -72,8 +72,8 @@ GLuint vao;
 GLuint p;
 GLuint waveTex;
 
-fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16))) = {0};
 fftwf_complex wavedata_out[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16))) = {0};
+fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned__(16))) = {0};
 
 bool rendered = false;
 bool flipped = false;
