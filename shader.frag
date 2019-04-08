@@ -51,8 +51,8 @@ Ray newRay(vec3 origin, vec3 direction, vec3 attenuation) {
 float dot2( in vec3 v ) { return dot(v,v); }
 float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 {
-    vec3 ba = b - a; vec3 pa = p - a;
     vec3 cb = c - b; vec3 pb = p - b;
+    vec3 ba = b - a; vec3 pa = p - a;
     vec3 ac = a - c; vec3 pc = p - c;
     vec3 nor = cross( ba, ac );
 
