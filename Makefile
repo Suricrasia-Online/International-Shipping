@@ -5,6 +5,26 @@
 # the Linux Sizecoding channel! #lsc on IRCNET!
 # ----------------------------------------
 
+# notes on the build system:
+# ~$ uname -a
+# Linux blackle-thinkpad 4.9.0-8-amd64 #1 SMP Debian 4.9.144-3 (2019-02-02) x86_64 GNU/Linux
+# ~$ gcc -dumpversion
+# 6.3.0
+# ~$ nasm --version
+# NASM version 2.14
+# ~$ lzma --version
+# xz (XZ Utils) 5.2.2
+# liblzma 5.2.2
+# ~$ dpkg-query --showformat='${Version}' --show libfftw3-dev:amd64
+# 3.3.5-3
+# ~$ dpkg-query --showformat='${Version}' --show libglib2.0-dev
+# 2.50.3-2
+# ~$ dpkg-query --showformat='${Version}' --show libgtk-3-dev:amd64
+# 3.22.11-1
+# ~$ dpkg-query --showformat='${Version}' --show mesa-common-dev:amd64
+# 13.0.6-1+b2
+
+
 # not using `pkg-config --libs` here because it will include too many libs
 CFLAGS := `pkg-config --cflags gtk+-3.0` -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -O1 -std=gnu11 -nostartfiles -Wall -Wextra
 
