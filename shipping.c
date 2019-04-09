@@ -28,17 +28,21 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define WAVE_SAMPLES 1024
 #define DEBUG
 
+inline void quit_asm() {
+	asm volatile(".intel_syntax noprefix");
+	asm volatile("xor edi, edi");
+	asm volatile("push 231"); //exit_group
+	asm volatile("pop rax");
+	asm volatile("syscall");
+	asm volatile(".att_syntax prefix");
+	__builtin_unreachable();
+}
+
 static gboolean check_escape(GtkWidget *widget, GdkEventKey *event)
 {
 	(void)widget;
 	if (event->keyval == GDK_KEY_Escape) {
-	asm volatile(".intel_syntax noprefix");
-	asm volatile("push 231"); //exit_group
-	asm volatile("pop rax");
-	asm volatile("xor edi, edi");
-	asm volatile("syscall");
-	asm volatile(".att_syntax prefix");
-	__builtin_unreachable();
+		quit_asm();
 		// gtk_main_quit();
 	}
 	return FALSE;
@@ -162,7 +166,7 @@ static void on_realize(GtkGLArea *glarea)
 			glGetShaderInfoLog(f, maxLength, &maxLength, error);
 			printf("%s\n", error);
 
-			exit(-10);
+			quit_asm();
 		}
 	#endif
 
@@ -181,7 +185,7 @@ static void on_realize(GtkGLArea *glarea)
 			glGetShaderInfoLog(v, maxLength, &maxLength, error);
 			printf("%s\n", error);
 
-			exit(-10);
+			quit_asm();
 		}
 	#endif
 
@@ -202,7 +206,7 @@ static void on_realize(GtkGLArea *glarea)
 			glGetProgramInfoLog(p, maxLength, &maxLength,error);
 			printf("%s\n", error);
 
-			exit(-10);
+			quit_asm();
 		}
 	#endif
 
@@ -251,12 +255,5 @@ void _start() {
 
 	gtk_main();
 
-	asm volatile(".intel_syntax noprefix");
-	asm volatile("push 231"); //exit_group
-	asm volatile("pop rax");
-	// asm volatile("xor edi, edi");
-	asm volatile("syscall");
-	asm volatile(".att_syntax prefix");
-	__builtin_unreachable();
-	// return 0;
+	quit_asm();
 }
