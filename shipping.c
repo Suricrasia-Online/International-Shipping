@@ -118,7 +118,7 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 			float x = (float)i/WAVE_SAMPLES;
 			float y = (float)j/WAVE_SAMPLES;
 			// Simulating Ocean Water - Jerry Tessendorf
-			wavedata_in[i][j] = p0d07*(rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
+			wavedata_in[i][j] = (rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
 		}
 	}
 

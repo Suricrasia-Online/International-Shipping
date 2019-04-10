@@ -110,17 +110,17 @@ float wake(vec2 uv) {
 
 	float xwiggly = sqrt(1.0-8.0*wakeangledot/(1.0+8.0*abs(wakeangledot)));
 
-	float distance = 1.4*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
+	float distance = 1.5*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*20.0-wakeangledot*3.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*18.0-wakeangledot*3.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.16).x*0.35;
-	// float maxdist = 0.05;
-	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height - /*sin(dist*10.70)*0.001*dist*dist +*/ (wake(vec2(0.25,0.0)-uv)+wake(vec2(0.0,0.0)-uv))*0.015;//*dist*dist*sqrt(1.0-dist);
+	float height = texture2D(wave, uv*0.16).x*0.02;
+	float maxdist = 0.05;
+	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
+	return height + dist*dist*0.01 + (wake(vec2(0.24,0.0)-uv)+0.8*wake(vec2(0.1,0.0)-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -176,7 +176,7 @@ Ray reflectionForRay(Ray ray, float fade) {
 	vec3 atten = fade * ray.m_attenuation * 0.9 * (1.0 - frensel*0.98);
 	vec3 reflected = reflect(ray.m_direction, normal);
 
-	return newRay(ray.m_point + normal*0.017, reflected, atten);
+	return newRay(ray.m_point + normal*0.01, reflected, atten);
 }
 
 void shadeBoat(inout Ray ray) {
