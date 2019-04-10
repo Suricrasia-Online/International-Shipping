@@ -101,7 +101,7 @@ static gboolean
 on_render (GtkGLArea *glarea, GdkGLContext *context)
 {
 	(void)context;
-	if (rendered || gtk_widget_get_allocated_width((GtkWidget*)glarea) != CANVAS_WIDTH) return TRUE;
+	if (rendered || gtk_widget_get_allocated_width((GtkWidget*)glarea) < CANVAS_WIDTH) return TRUE;
 	if (!flipped) { gtk_gl_area_queue_render(glarea); flipped = true; return TRUE; }
 
 	rendered = true;
