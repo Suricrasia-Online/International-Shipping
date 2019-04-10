@@ -167,7 +167,7 @@ void castRay(inout Ray ray) {
 
 //this is trash and needs to be better
 vec3 skyDomeShade(vec3 angle) {
-	return mix(vec3(1.71, 1.31, 0.83),skycol, pow(abs(angle.z), 0.5)) + pow(max(dot(angle, sundir),0.0),1000.0)*suncol*4.0;
+	return mix(vec3(1.71, 1.31, 0.83),skycol, pow(abs(angle.z), 0.5)) + pow(max(dot(angle, sundir),0.0),1500.0)*suncol*4.0;
 }
 
 Ray reflectionForRay(Ray ray, float fade) {
