@@ -160,7 +160,7 @@ void castRay(inout Ray ray) {
 		}
 
 		dt = dt*1.018;
-		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*16.0)*64.0,1.0),dist2scene) * ray.m_direction;
+		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*25.0)*75.0,1.0),dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}
 }
