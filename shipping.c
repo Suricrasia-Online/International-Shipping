@@ -26,6 +26,7 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define CANVAS_HEIGHT 1080
 #define SCANLINE_SIZE 10
 #define WAVE_SAMPLES 1024
+#define CHAR_BUFF_SIZE 256
 #define DEBUG
 
 inline void quit_asm() {
@@ -88,12 +89,12 @@ float phillips_spectrum(float x, float y) {
 	float k = x*x+y*y; //m...??
 	// float windspeed = 3.5; //m/s
 	// float gravity = 9.8; //m/s^2
-	float len = 1.25; //m
+	// float len = 1.25; //m
 	// float windx = 0.0; //m/s
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/2) return 0.0;
-	return 0.1*exp(-1.0/(k*len*len))/(k*k) * pow(y,p1d20);
+	return exp(-p0d64/k)/(k*k) * pow(y,p1d20);
 }
 
 static gboolean
@@ -117,7 +118,7 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 			float x = (float)i/WAVE_SAMPLES;
 			float y = (float)j/WAVE_SAMPLES;
 			// Simulating Ocean Water - Jerry Tessendorf
-			wavedata_in[i][j] = M_SQRT1_2*(rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
+			wavedata_in[i][j] = p0d07*(rand_gauss() + rand_gauss()*I)*phillips_spectrum(x, y);
 		}
 	}
 
@@ -148,8 +149,11 @@ static void on_realize(GtkGLArea *glarea)
 	//let ppl pass the number of samples they want into the demo
 	char* samples = getenv("SAMPLES");
 	if (samples == NULL) samples = DEFAULT_SAMPLES;
-	char defines[512];
-	sprintf(defines, "#version 420\n#define SAMPLES %s\n", samples);
+	char defines[CHAR_BUFF_SIZE];
+	// 4k is no reason to have buffer overflows uwu
+	if (snprintf(defines, CHAR_BUFF_SIZE, "#version 420\n#define SAMPLES %s\n", samples) >= CHAR_BUFF_SIZE) {
+		quit_asm();
+	}
 
 	const char* shader_frag_list[] = {defines, shader_frag_min};
 	glShaderSource(f, 2, shader_frag_list, NULL);
