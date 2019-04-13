@@ -51,7 +51,8 @@ static gboolean check_escape(GtkWidget *widget, GdkEventKey *event)
 
 // uint32_t randomstate = 0x6b873edd;
 // uint32_t randomstate = 0x31debeab;
-uint32_t randomstate = 0x96fcd33;
+// uint32_t randomstate = 0x96fcd33;
+uint32_t randomstate = 0x2c3effc2;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
 	randomstate = randomstate ^ (randomstate >> 17u);
@@ -63,13 +64,17 @@ float rand_float() {
 
 // I should've made this a sum of 12 random floats, subtracted by 6, but it's too late now :c
 float rand_gauss() {
-	float a, b, W;
-	do {
-		a = (rand_float()-0.5)*2.0;
-		b = (rand_float()-0.5)*2.0;
-		W = a*a+b*b;
-	} while (W >= 1.0);
-	return a * sqrt ((-2.0 * log (W)) / W);
+	float a = 0.0;//, b, W;
+	for (int i = 0; i < 12; i++) {
+		a += rand_float();
+	}
+	return a - 6.0;
+	// do {
+	// 	a = (rand_float()-0.5)*2.0;
+	// 	b = (rand_float()-0.5)*2.0;
+	// 	W = a*a+b*b;
+	// } while (W >= 1.0);
+	// return a * sqrt ((-2.0 * log (W)) / W);
 	// return a * mult;
 }
 
@@ -94,7 +99,7 @@ float phillips_spectrum(float x, float y) {
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/2) return 0.0;
-	return exp(-p0d64/k)/(k*k) * pow(y,p1d20);
+	return exp(-p1d90/k)/(k*k) * pow(y,p1d30);
 }
 
 static gboolean
@@ -135,7 +140,7 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 		while (gtk_events_pending()) gtk_main_iteration();
   }
 
-
+	// quit_asm();
 	return TRUE;
 }
 

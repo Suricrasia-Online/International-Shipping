@@ -71,7 +71,7 @@ float udTriangle( vec3 p, vec3 a, vec3 b, vec3 c )
 
 
 float scene(vec3 p) {
-	vec3 point = vec3(abs(p.xy), p.z+0.06);
+	vec3 point = vec3(abs(p.xy), p.z+0.04);
 	if (length(point)>0.8) return 0.8;
 	float scale = 3.5;
 	point *= scale;
@@ -100,7 +100,7 @@ float scene(vec3 p) {
 
 float wake(vec2 uv) {
 	vec2 uvm = vec2(uv.x,abs(uv.y));
-	vec2 wakeangle = normalize(vec2(1.0,0.9));
+	vec2 wakeangle = normalize(vec2(1.0));
 	vec2 wakeangleflipped = vec2(wakeangle.y,-wakeangle.x);
 
 	float wakeangledot = dot(uvm,wakeangle);
@@ -112,15 +112,15 @@ float wake(vec2 uv) {
 
 	float distance = 1.5*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*18.0-wakeangledot*3.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*18.0-wakeangledot*6.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.16).x*0.02;
-	float maxdist = 0.05;
-	float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height + dist*dist*0.01 + (wake(vec2(0.24,0.0)-uv)+0.8*wake(vec2(0.1,0.0)-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
+	float height = texture2D(wave, uv*0.15+vec2(0.01)).x*0.02;
+	// float maxdist = 0.05;
+	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
+	return height - (wake(vec2(0.29,0.0)-uv)+wake(-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -145,6 +145,7 @@ void castRay(inout Ray ray) {
 	for (int i = 0; i < 400; i++) {
 		if (length(ray.m_origin - ray.m_point) > maxdist) return;
 		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
+		if (ray.m_point.z > 0.1 && ray.m_point.y < 0.0 && ray.m_point.x < 0.0 && ray.m_direction.z > 0.0) return;
 		float dist2scene = scene(ray.m_point)*0.9;
 		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
 
@@ -160,7 +161,7 @@ void castRay(inout Ray ray) {
 		}
 
 		dt = dt*1.018;
-		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*25.0)*75.0,1.0),dist2scene) * ray.m_direction;
+		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*30.0)*80.0,1.0),dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}
 }
@@ -183,7 +184,7 @@ void shadeBoat(inout Ray ray) {
 	//this code is super spaghetti and I'm so fucking sorry
 	vec3 normal = -sceneGrad(ray.m_point);
 	float frensel = abs(dot(ray.m_direction, normal));
-	float nearness = ray.m_point.z - heightmap(ray.m_point.xy);
+	float nearness = ray.m_point.z;//heightmap(ray.m_point.xy);
 	nearness = sqrt(min(nearness*6.0+.1,1.0));
 	vec3 reflected_sun = reflect(sundir, normal);
 	vec3 reflected_sky = reflect(vec3(0.0,0.0,1.0), normal);
@@ -209,7 +210,10 @@ void addToQueue(Ray ray) {
 }
 
 void recursivelyRender(inout Ray ray) {
-	ray.m_point += ray.m_direction*3.0;
+	//jump close to surface of water
+	float t = -(dot(ray.m_point, vec3(0.0,0.0,1.0)) - 0.05)/dot(ray.m_direction, vec3(0.0,0.0,1.0));
+	if (dot(normalize(vec3(0.0,0.0,0.15)-ray.m_point),ray.m_direction) > 0.995) t = 4.0;
+	ray.m_point += ray.m_direction*t;
 		rayQueue[0] = ray;
 
 		for (int i = 0; i < MAXDEPTH; i++) {
