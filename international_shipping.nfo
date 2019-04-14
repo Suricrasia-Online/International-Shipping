@@ -1,3 +1,4 @@
+|                                      |
 | ------------------------------------ |
 | // INTERNATIONAL SHIPPING ////////// |
 | ------------------------------------ |
@@ -5,7 +6,7 @@
 | for ubuntu 18.10 and nvidia graphics |
 | ------------------------------------ |
 | libs needed: -lGL -lgtk-3 -lgdk-3    |
-|              -lgobject-2.0 -lfftw3f  |
+|   -lglib-2.0 -lgobject-2.0 -lfftw3f  |
 | ------------------------------------ |
 | execution instructions:              |
 | note to orgas: use ./shipping_party  |
@@ -15,6 +16,14 @@
 | by default it is 1, but in the party |
 | version it is set to 1000 samples.   |
 | ------------------------------------ |
-| don't kill your gpu!                 |
-|                  render responsibly! |
+| pressing "esc" or "alt-f4" will quit |
+| immediately. below are the rendering |
+| times for two different gfx cards:   |
 | ------------------------------------ |
+| SAMPLES | Quadro K1000M | GTX 980 Ti |
+|       1 |         0.9 s |            |
+|      10 |         2.9 s |            |
+|     100 |        17.2 s |            |
+|    1000 |       165.6 s |            |
+| ------------------------------------ |
+|                                      |
