@@ -19,12 +19,11 @@
 |                                      |
 | By default the # of samples is 1000. |
 | ------------------------------------ |
-| Use the `shipping_1_sample_unpacked` |
-| file if the 4k version does not exec |
-| on your machine for whatever reason, |
-| as the packer is not compatible with |
-| certain systems. Also, the default # |
-| of samples is 1 instead of 1000.     |
+| Use the shipping_unpacked executable |
+| if the 4k version won't exec on your |
+| your machine, as it is possible that |
+| the packer is incompatible with your |
+| system. Happy rendering!             |
 | ------------------------------------ |
 | Pressing "esc" or "alt-f4" will quit |
 | immediately. below are the rendering |

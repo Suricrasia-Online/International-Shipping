@@ -35,7 +35,7 @@ all : shipping.zip check_size
 screenshot.jpg : 1000_samples.png
 	convert -quality 100 $< $@
 
-shipping.zip : shipping shipping_1_sample_unpacked README.txt international_shipping.nfo screenshot.jpg
+shipping.zip : shipping shipping_unpacked README.txt international_shipping.nfo screenshot.jpg
 	zip shipping.zip $^
 
 packer : vondehi/vondehi.asm 
@@ -66,13 +66,10 @@ shader.frag.min : shader.frag Makefile
 shader.h : shader.frag.min Makefile
 	mono ./shader_minifier.exe shader.frag.min -o shader.h
 
-shipping_1_sample.elf : shipping.c shader.h Makefile
-	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1"'
-
 shipping.elf : shipping.c shader.h Makefile
 	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1000"'
 
-shipping_1_sample_unpacked : shipping_1_sample.elf
+shipping_unpacked : shipping.elf
 	mv $< $@
 
 shipping : shipping_opt.elf.packed
@@ -102,7 +99,7 @@ shipping : shipping_opt.elf.packed
 	chmod +x $@
 
 clean :
-	-rm *.elf *.xz shader.h shipping shipping_1_sample_unpacked screenshot.jpg shipping.zip
+	-rm *.elf *.xz shader.h shipping shipping_unpacked screenshot.jpg shipping.zip
 
 check_size :
 	./sizelimit_check.sh

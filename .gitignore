@@ -1,6 +1,6 @@
 *.elf
 shipping
-shipping_1_sample_unpacked
+shipping_unpacked
 shader.h
 shader.frag.min
 shipping.zip
