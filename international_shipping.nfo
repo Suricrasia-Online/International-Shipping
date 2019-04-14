@@ -2,21 +2,31 @@
 | ------------------------------------ |
 | // INTERNATIONAL SHIPPING ////////// |
 | ------------------------------------ |
-| ~a 4k gfx demo by suricrasia online~ |
-| for ubuntu 18.10 and nvidia graphics |
+|  a 4k gfx demo by Suricrasia Online  |
+| for Ubuntu 18.10 and NVidia graphics |
+| Revision 2019 @ Saarbrücken, Germany |
 | ------------------------------------ |
 | libs needed: -lGL -lgtk-3 -lgdk-3    |
 |   -lglib-2.0 -lgobject-2.0 -lfftw3f  |
 | ------------------------------------ |
-| execution instructions:              |
-| note to orgas: use ./shipping_party  |
+| Execution instructions:              |
+|                                      |
 | ~$ ./shipping                        |
+|                                      |
 | or, to choose the number of samples: |
+|                                      |
 | ~$ env SAMPLES=10 ./shipping         |
-| by default it is 1, but in the party |
-| version it is set to 1000 samples.   |
+|                                      |
+| By default the # of samples is 1000. |
 | ------------------------------------ |
-| pressing "esc" or "alt-f4" will quit |
+| Use the `shipping_1_sample_unpacked` |
+| file if the 4k version does not exec |
+| on your machine for whatever reason, |
+| as the packer is not compatible with |
+| certain systems. Also, the default # |
+| of samples is 1 instead of 1000.     |
+| ------------------------------------ |
+| Pressing "esc" or "alt-f4" will quit |
 | immediately. below are the rendering |
 | times for two different gfx cards:   |
 | ------------------------------------ |

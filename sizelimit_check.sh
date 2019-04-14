@@ -8,6 +8,5 @@ function check_size() {
 	fi
 }
 
-wc -c shipping shipping_party
+wc -c shipping
 check_size "shipping"
-check_size "shipping_party"

@@ -28,9 +28,15 @@
 # not using `pkg-config --libs` here because it will include too many libs
 CFLAGS := `pkg-config --cflags gtk+-3.0` -lglib-2.0 -lm -lGL -lgtk-3 -lgdk-3 -lgobject-2.0 -lfftw3f -no-pie -fno-plt -O1 -std=gnu11 -nostartfiles -Wall -Wextra
 
-all : shipping shipping_party check_size
-
 .PHONY: clean check_size
+
+all : shipping.zip check_size
+
+screenshot.jpg : 1000_samples.png
+	convert -quality 100 $< $@
+
+shipping.zip : shipping shipping_1_sample_unpacked README.txt international_shipping.nfo screenshot.jpg
+	zip shipping.zip $^
 
 packer : vondehi/vondehi.asm 
 	cd vondehi; nasm -fbin -o vondehi vondehi.asm
@@ -60,16 +66,16 @@ shader.frag.min : shader.frag Makefile
 shader.h : shader.frag.min Makefile
 	mono ./shader_minifier.exe shader.frag.min -o shader.h
 
-shipping.elf : shipping.c shader.h Makefile
+shipping_1_sample.elf : shipping.c shader.h Makefile
 	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1"'
 
-shipping_party.elf : shipping.c shader.h Makefile
+shipping.elf : shipping.c shader.h Makefile
 	gcc -o $@ $< $(CFLAGS) -DDEFAULT_SAMPLES='"1000"'
 
-shipping : shipping_opt.elf.packed
+shipping_1_sample_unpacked : shipping_1_sample.elf
 	mv $< $@
 
-shipping_party : shipping_party_opt.elf.packed
+shipping : shipping_opt.elf.packed
 	mv $< $@
 
 #all the rest of these rules just takes a compiled elf file and generates a packed version of it with vondehi
@@ -96,7 +102,7 @@ shipping_party : shipping_party_opt.elf.packed
 	chmod +x $@
 
 clean :
-	-rm *.elf *.xz shader.h shipping
+	-rm *.elf *.xz shader.h shipping shipping_1_sample_unpacked screenshot.jpg shipping.zip
 
 check_size :
 	./sizelimit_check.sh

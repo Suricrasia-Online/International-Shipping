@@ -1,5 +1,7 @@
 *.elf
 shipping
-shipping_party
+shipping_1_sample_unpacked
 shader.h
 shader.frag.min
+shipping.zip
+screenshot.jpg
