@@ -117,7 +117,7 @@ float wake(vec2 uv) {
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.15).x*0.04;
+	float height = texture2D(wave, uv*0.15).x*0.04+0.01;
 	// float maxdist = 0.05;
 	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
 	return height - (wake(vec2(0.28,0.0)-uv)+wake(-uv)+0.1*wake(vec2(-0.3,0.0)-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
@@ -144,7 +144,7 @@ void castRay(inout Ray ray) {
 	float lastdiff = 0.0;
 	for (int i = 0; i < 200; i++) {
 		if (length(ray.m_origin - ray.m_point) > maxdist) return;
-		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
+		if (ray.m_point.z > 1.0 || ray.m_point.y > 3.0 || ray.m_point.x > 3.0) return;
 		if (ray.m_point.z > 0.1 && ray.m_point.y + ray.m_point.x < -0.5 && ray.m_direction.z > 0.0) return;
 		float dist2scene = scene(ray.m_point);
 		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
@@ -160,7 +160,7 @@ void castRay(inout Ray ray) {
 			return;
 		}
 
-		dt = dt*1.018;
+		dt = dt*1.02;
 		ray.m_point += min(dt*max(diff*(1.0-abs(ray.m_direction.z)+max(ray.m_direction.z,0.0)*30.0)*80.0,1.0),dist2scene) * ray.m_direction;
 		lastdiff = diff;
 	}
@@ -184,7 +184,7 @@ void shadeBoat(inout Ray ray) {
 	//this code is super spaghetti and I'm so fucking sorry
 	vec3 normal = -sceneGrad(ray.m_point);
 	float frensel = abs(dot(ray.m_direction, normal));
-	float nearness = ray.m_point.z;//heightmap(ray.m_point.xy);
+	float nearness = abs(ray.m_point.z);//heightmap(ray.m_point.xy);
 	nearness = sqrt(min(nearness*6.0+.1,1.0));
 	vec3 reflected_sun = reflect(sundir, normal);
 	vec3 reflected_sky = reflect(vec3(0.0,0.0,1.0), normal);
@@ -211,7 +211,7 @@ void addToQueue(Ray ray) {
 
 void recursivelyRender(inout Ray ray) {
 	//jump close to surface of water
-	float t = -(dot(ray.m_point, vec3(0.0,0.0,1.0)) - 0.06)/dot(ray.m_direction, vec3(0.0,0.0,1.0));
+	float t = -(dot(ray.m_point, vec3(0.0,0.0,1.0)) - 0.08)/dot(ray.m_direction, vec3(0.0,0.0,1.0));
 	//except near boat
 	if (gl_FragCoord.y > 390 && gl_FragCoord.x > 684 && gl_FragCoord.x < 1208 && gl_FragCoord.y < 761 && (gl_FragCoord.y < 598 || gl_FragCoord.x > 893)) t = 4.5;
 	ray.m_point += ray.m_direction*t;

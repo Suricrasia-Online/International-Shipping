@@ -30,6 +30,7 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 
 #define DEBUG
 #define TIME_RENDER
+// #define GEN_BOATS
 
 inline void quit_asm() {
 	asm volatile(".intel_syntax noprefix");
@@ -41,20 +42,11 @@ inline void quit_asm() {
 	__builtin_unreachable();
 }
 
-static gboolean check_escape(GtkWidget *widget, GdkEventKey *event)
-{
-	(void)widget;
-	if (event->keyval == GDK_KEY_Escape) {
-		quit_asm();
-		// gtk_main_quit();
-	}
-	return FALSE;
-}
-
 // uint32_t randomstate = 0x6b873edd;
 // uint32_t randomstate = 0x31debeab;
 // uint32_t randomstate = 0x96fcd33;
-uint32_t randomstate = 0x2c3effc2;
+// uint32_t randomstate = 0x2c3effc2;
+uint32_t randomstate = 0x36dc64af;
 float rand_float() {
 	randomstate = randomstate ^ (randomstate << 13u);
 	randomstate = randomstate ^ (randomstate >> 17u);
@@ -64,20 +56,12 @@ float rand_float() {
 	return *((float*)(&intermediate)) - 1.0;
 }
 
-// I should've made this a sum of 12 random floats, subtracted by 6, but it's too late now :c
 float rand_gauss() {
-	float a = 0.0;//, b, W;
+	float a = 0.0;
 	for (int i = 0; i < 12; i++) {
 		a += rand_float();
 	}
 	return a - 6.0;
-	// do {
-	// 	a = (rand_float()-0.5)*2.0;
-	// 	b = (rand_float()-0.5)*2.0;
-	// 	W = a*a+b*b;
-	// } while (W >= 1.0);
-	// return a * sqrt ((-2.0 * log (W)) / W);
-	// return a * mult;
 }
 
 GLuint vao;
@@ -94,16 +78,20 @@ bool flipped = false;
 GTimer* gtimer;
 #endif
 
+static gboolean check_escape(GtkWidget *widget, GdkEventKey *event)
+{
+	(void)widget;
+	if (event->keyval == GDK_KEY_Escape) {
+		quit_asm();
+	}
+
+	return FALSE;
+}
+
 float phillips_spectrum(float x, float y) {
-	float scale = 250.0; //m? reciprocal meters?
-	x *= scale; y *= scale; //m???
-	float k = x*x+y*y; //m...??
-	// float windspeed = 3.5; //m/s
-	// float gravity = 9.8; //m/s^2
-	// float len = 1.25; //m
-	// float windx = 0.0; //m/s
-	// float windy = 1.0; //m/s
-	// float dot = windx*x + windy*y; //m^2/s??
+	float scale = 250.0;
+	x *= scale; y *= scale;
+	float k = x*x+y*y;
 	if (k > WAVE_SAMPLES/2) return 0.0;
 	return exp(-2.0/k)/(k*k) * y;
 }

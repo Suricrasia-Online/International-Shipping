@@ -18,4 +18,4 @@ By default this will render with 1000 samples per pixel, on my machine (i7-3720Q
 
 ~$ SAMPLES=10 ./shipping
 
-This takes 3 seconds on my machine. See the .nfo file for render timings on a K1000M and a 980 Ti.
+This takes 3 seconds on my machine. See the .nfo file for render timings on a K1000M and a 980 Ti. Please note, it will only render if your screen is at least 1920 pixels wide.
