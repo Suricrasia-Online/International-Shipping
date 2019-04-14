@@ -110,17 +110,17 @@ float wake(vec2 uv) {
 
 	float xwiggly = sqrt(1.0-8.0*wakeangledot/(1.0+8.0*abs(wakeangledot)));
 
-	float distance = 1.5*xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
+	float distance = xwiggly*(wakeangledot > 0.0 ? abs(wakeangleflippeddot) : length(uvm));
 	// if (wakeangleflippeddot > 0.0) return 0.0;
-	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*18.0-wakeangledot*6.0);//*xfalloff;
+	return sign(wakeangleflippeddot)*sin(distance*120.0)*exp(-distance*20.0-wakeangledot*5.0);//*xfalloff;
 }
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.15+vec2(0.01)).x*0.02;
+	float height = texture2D(wave, uv*0.15).x*0.04;
 	// float maxdist = 0.05;
 	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
-	return height - (wake(vec2(0.29,0.0)-uv)+wake(-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
+	return height - (wake(vec2(0.28,0.0)-uv)+wake(-uv)+0.1*wake(vec2(-0.3,0.0)-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
 }
 
 vec2 epsi = vec2(0.0005, 0.0);
@@ -142,11 +142,11 @@ void castRay(inout Ray ray) {
 	// Cast ray from origin into scene
 	float dt = 0.008;
 	float lastdiff = 0.0;
-	for (int i = 0; i < 400; i++) {
+	for (int i = 0; i < 200; i++) {
 		if (length(ray.m_origin - ray.m_point) > maxdist) return;
 		if (ray.m_point.z > 1.5 || ray.m_point.y > 2.5 || ray.m_point.x > 2.5) return;
-		if (ray.m_point.z > 0.1 && ray.m_point.y < 0.0 && ray.m_point.x < 0.0 && ray.m_direction.z > 0.0) return;
-		float dist2scene = scene(ray.m_point)*0.9;
+		if (ray.m_point.z > 0.1 && ray.m_point.y + ray.m_point.x < -0.5 && ray.m_direction.z > 0.0) return;
+		float dist2scene = scene(ray.m_point);
 		float diff = ray.m_point.z - heightmap(ray.m_point.xy);
 
 		if (abs(dist2scene) < epsi.x) {
@@ -211,8 +211,9 @@ void addToQueue(Ray ray) {
 
 void recursivelyRender(inout Ray ray) {
 	//jump close to surface of water
-	float t = -(dot(ray.m_point, vec3(0.0,0.0,1.0)) - 0.05)/dot(ray.m_direction, vec3(0.0,0.0,1.0));
-	if (dot(normalize(vec3(0.0,0.0,0.15)-ray.m_point),ray.m_direction) > 0.995) t = 4.0;
+	float t = -(dot(ray.m_point, vec3(0.0,0.0,1.0)) - 0.06)/dot(ray.m_direction, vec3(0.0,0.0,1.0));
+	//except near boat
+	if (gl_FragCoord.y > 390 && gl_FragCoord.x > 684 && gl_FragCoord.x < 1208 && gl_FragCoord.y < 761 && (gl_FragCoord.y < 598 || gl_FragCoord.x > 893)) t = 4.5;
 	ray.m_point += ray.m_direction*t;
 		rayQueue[0] = ray;
 
@@ -274,7 +275,7 @@ void main() {
 		}
 		col /= float(maxsamples);
 		col += pow(getFloat(),2.0)*0.2 *vec3(0.8,0.9,1.0); //noise
-		col *= (1.0 - pow(length(uv_base)*0.75, 2.5)); //vingetting lol
+		col *= (1.0 - pow(length(uv_base)*0.70, 2.0)); //vingetting lol
 		fragCol = vec4(pow(log(col+1.0), vec3(1.3))*1.25, 1.0); //colour grading
 
 		// fragCol = (texture2D(wave, uv).xxxx+1.0)/2.0;*/

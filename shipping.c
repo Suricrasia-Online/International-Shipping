@@ -27,7 +27,9 @@ const char* vshader = "#version 450\nvec2 y=vec2(1.,-1);\nvec4 x[4]={y.yyxx,y.xy
 #define SCANLINE_SIZE 10
 #define WAVE_SAMPLES 1024
 #define CHAR_BUFF_SIZE 256
+
 #define DEBUG
+#define TIME_RENDER
 
 inline void quit_asm() {
 	asm volatile(".intel_syntax noprefix");
@@ -88,8 +90,12 @@ fftwf_complex wavedata_in[WAVE_SAMPLES][WAVE_SAMPLES] __attribute__ ((__aligned_
 bool rendered = false;
 bool flipped = false;
 
+#ifdef TIME_RENDER
+GTimer* gtimer;
+#endif
+
 float phillips_spectrum(float x, float y) {
-	float scale = 200.0; //m? reciprocal meters?
+	float scale = 250.0; //m? reciprocal meters?
 	x *= scale; y *= scale; //m???
 	float k = x*x+y*y; //m...??
 	// float windspeed = 3.5; //m/s
@@ -99,7 +105,7 @@ float phillips_spectrum(float x, float y) {
 	// float windy = 1.0; //m/s
 	// float dot = windx*x + windy*y; //m^2/s??
 	if (k > WAVE_SAMPLES/2) return 0.0;
-	return exp(-p1d90/k)/(k*k) * pow(y,p1d30);
+	return exp(-2.0/k)/(k*k) * y;
 }
 
 static gboolean
@@ -140,8 +146,10 @@ on_render (GtkGLArea *glarea, GdkGLContext *context)
 		while (gtk_events_pending()) gtk_main_iteration();
   }
 
-	// quit_asm();
-	return TRUE;
+#ifdef TIME_RENDER
+  printf("render time: %f\n", g_timer_elapsed(gtimer, NULL));
+#endif
+  return TRUE;
 }
 
 static void on_realize(GtkGLArea *glarea)
@@ -164,39 +172,39 @@ static void on_realize(GtkGLArea *glarea)
 	glShaderSource(f, 2, shader_frag_list, NULL);
 	glCompileShader(f);
 
-	#ifdef DEBUG
-		GLint isCompiled = 0;
-		glGetShaderiv(f, GL_COMPILE_STATUS, &isCompiled);
-		if(isCompiled == GL_FALSE) {
-			GLint maxLength = 0;
-			glGetShaderiv(f, GL_INFO_LOG_LENGTH, &maxLength);
+#ifdef DEBUG
+	GLint isCompiled = 0;
+	glGetShaderiv(f, GL_COMPILE_STATUS, &isCompiled);
+	if(isCompiled == GL_FALSE) {
+		GLint maxLength = 0;
+		glGetShaderiv(f, GL_INFO_LOG_LENGTH, &maxLength);
 
-			char* error = malloc(maxLength);
-			glGetShaderInfoLog(f, maxLength, &maxLength, error);
-			printf("%s\n", error);
+		char* error = malloc(maxLength);
+		glGetShaderInfoLog(f, maxLength, &maxLength, error);
+		printf("%s\n", error);
 
-			quit_asm();
-		}
-	#endif
+		quit_asm();
+	}
+#endif
 
 	GLuint v = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(v, 1, &vshader, NULL);
 	glCompileShader(v);
 
-	#ifdef DEBUG
-		GLint isCompiled2 = 0;
-		glGetShaderiv(v, GL_COMPILE_STATUS, &isCompiled2);
-		if(isCompiled2 == GL_FALSE) {
-			GLint maxLength = 0;
-			glGetShaderiv(v, GL_INFO_LOG_LENGTH, &maxLength);
+#ifdef DEBUG
+	GLint isCompiled2 = 0;
+	glGetShaderiv(v, GL_COMPILE_STATUS, &isCompiled2);
+	if(isCompiled2 == GL_FALSE) {
+		GLint maxLength = 0;
+		glGetShaderiv(v, GL_INFO_LOG_LENGTH, &maxLength);
 
-			char* error = malloc(maxLength);
-			glGetShaderInfoLog(v, maxLength, &maxLength, error);
-			printf("%s\n", error);
+		char* error = malloc(maxLength);
+		glGetShaderInfoLog(v, maxLength, &maxLength, error);
+		printf("%s\n", error);
 
-			quit_asm();
-		}
-	#endif
+		quit_asm();
+	}
+#endif
 
 	// link shader
 	p = glCreateProgram();
@@ -204,20 +212,20 @@ static void on_realize(GtkGLArea *glarea)
 	glAttachShader(p,f);
 	glLinkProgram(p);
 
-	#ifdef DEBUG
-		GLint isLinked = 0;
-		glGetProgramiv(p, GL_LINK_STATUS, (int *)&isLinked);
-		if (isLinked == GL_FALSE) {
-			GLint maxLength = 0;
-			glGetProgramiv(p, GL_INFO_LOG_LENGTH, &maxLength);
+#ifdef DEBUG
+	GLint isLinked = 0;
+	glGetProgramiv(p, GL_LINK_STATUS, (int *)&isLinked);
+	if (isLinked == GL_FALSE) {
+		GLint maxLength = 0;
+		glGetProgramiv(p, GL_INFO_LOG_LENGTH, &maxLength);
 
-			char* error = malloc(maxLength);
-			glGetProgramInfoLog(p, maxLength, &maxLength,error);
-			printf("%s\n", error);
+		char* error = malloc(maxLength);
+		glGetProgramInfoLog(p, maxLength, &maxLength,error);
+		printf("%s\n", error);
 
-			quit_asm();
-		}
-	#endif
+		quit_asm();
+	}
+#endif
 
 	glGenVertexArrays(1, &vao);
 
@@ -230,6 +238,9 @@ static void on_realize(GtkGLArea *glarea)
 
 void _start() {
 	asm volatile("sub $8, %rsp\n");
+#ifdef TIME_RENDER
+	gtimer = g_timer_new();
+#endif
 
 #ifdef GEN_BOATS
 	srand(time(0));
