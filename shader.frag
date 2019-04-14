@@ -117,7 +117,7 @@ float wake(vec2 uv) {
 
 float heightmap(vec2 uv) {
 	//lots of random ripples uwu
-	float height = texture2D(wave, uv*0.15).x*0.04+0.01;
+	float height = texture(wave, uv*0.15).x*0.04+0.01;
 	// float maxdist = 0.05;
 	// float dist = max(maxdist-abs(scene(vec3(uv,height))),0.0)/maxdist;
 	return height - (wake(vec2(0.28,0.0)-uv)+wake(-uv)+0.1*wake(vec2(-0.3,0.0)-uv))*0.025;//*dist*dist*sqrt(1.0-dist);
