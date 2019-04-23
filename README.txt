@@ -1,4 +1,4 @@
-International Shipping is a 4k gfx demo for 64-bit linux, specifically targeting Ubuntu 18.10 with NVidia graphics cards and proprietary drivers.
+International Shipping is a 4k gfx demo for 64-bit linux, specifically targeting Ubuntu 18.10.
 
 Packages needed:
 (all of these are by default installed on Ubuntu after installing NVidia drivers.)
@@ -6,7 +6,7 @@ Packages needed:
 libglib2.0-0
 libgtk-3-0
 libfftw3-single3
-nvidia-###, where ### is the latest driver number
+some kind of graphics driver (mesa or nvidia are fine)
 
 Execution instructions:
 
